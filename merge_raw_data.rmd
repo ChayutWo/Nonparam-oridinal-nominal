@@ -1,0 +1,110 @@
+
+---
+title: "Generate data from PUMS"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+library(coda)
+```
+
+* * *
+```{r}
+# Download raw household level data
+psam_husa <- read.table('Datasets/csv_hus/psam_husa.csv', sep = ',', header = TRUE)
+psam_husb <- read.table('Datasets/csv_hus/psam_husb.csv', sep = ',', header = TRUE)
+
+# Join them
+household <- rbind(psam_husa, psam_husb)
+
+# Filter only housing unit
+household <- household %>%
+  filter(TYPE == 1)
+
+# remove loaded data to save space
+rm(psam_husa,psam_husb)
+```
+
+```{r}
+# Download raw personal level data
+psam_pusa <- read.table('Datasets/csv_pus/psam_pusa.csv', sep = ',', header = TRUE)
+psam_pusb <- read.table('Datasets/csv_pus/psam_pusb.csv', sep = ',', header = TRUE)
+
+# Filter only household reference person
+psam_pusa <- psam_pusa %>%
+  filter(RELP == 0)
+
+psam_pusb <- psam_pusb %>%
+  filter(RELP == 0)
+
+# Join them
+personal <- rbind(psam_pusa, psam_pusb)
+
+# remove loaded data to save space
+rm(psam_pusa, psam_pusb)
+```
+
+```{r}
+# Merge the two on SERIALNO
+merged_df <- merge(household, personal, by = 'SERIALNO')
+rm(household, personal)
+head(merged_df)
+```
+
+```{r}
+# Save csv
+write.csv(merged_df,"Datasets/merged/raw_dataset.csv", row.names = FALSE)
+```
+
+```{r}
+# Check merged data
+df <- read.table('Datasets/merged/raw_dataset.csv', sep = ',', header = TRUE)
+head(df)
+```
+
+* * *
+
+
+
