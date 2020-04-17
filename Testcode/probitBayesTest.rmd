@@ -1,0 +1,211 @@
+
+---
+title: "Make the code suitable for any number of ordinal variables"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+library(coda)
+```
+
+* * *
+
+1. Simulate data and set cutoffs
+
+Setting:
+
+Generate $Z \sim Normal(\mu, \Sigma)$ where:
+
+- $\mu$ = $[0, 0, 0, 0]$
+
+- $$\Sigma = (\begin{array}{cc} 
+4 & 0.4 & -2.4 & 1.6\\
+0.4 & 4 & 1.2 & -2.4\\
+-2.4 & 1.2 & 9 & 1.2\\
+1.6 & -2.4 & 1.2 & 4
+\end{array})$$
+
+- From $z_1$ to $z_4$ apply thresholds to get $y_1$ to $y_4$
+
+- $y_1$ and $y_3$ will have 5 levels while the others have 4
+
+```{r}
+# Set mean and covariance matrix for z
+set.seed(0)
+n <- 500
+R <- 4
+d <- 4
+
+true_mu <- c(0, 0, 0, 0)
+true_sigma <- matrix(c(4, 0.4, -2.4, 1.6, 0.4, 4,1.2,
+                      -2.4,-2.4,1.2,9,1.2,1.6,-2.4,1.2,4), nrow = 4, ncol = 4)
+
+# sample Z from multivariate normal
+Z <- rmvnorm(n, mean = true_mu, sigma = true_sigma)
+
+# set cutoffs
+levels <- c(5,4,5,4)
+# z1 will have 5 levels
+gamma1_true <- quantile(Z[,1], probs = c(0.15, 0.3, 0.7, 0.85))
+# z2 will have 4 levels
+gamma2_true <- quantile(Z[,2], probs = c(0.25, 0.5, 0.75))
+# z3 will have 5 levels
+gamma3_true <- quantile(Z[,1], probs = c(0.15, 0.35, 0.7, 0.85))
+# z4 will have 4 levels
+gamma4_true <- quantile(Z[,2], probs = c(0.2, 0.55, 0.8))
+
+gamma_true <- list(gamma1_true, gamma2_true, gamma3_true, gamma4_true)
+
+# Set y according to the cutoff
+y_original <- matrix(0, nrow = n, ncol = R)
+for (z_index in 1:R) {
+  yval <- 2
+  for (level in 1:(levels[z_index]-1)) {
+    ind <- (Z[,z_index] <= gamma_true[[z_index]][level+1]) & 
+      (Z[,z_index] > gamma_true[[z_index]][level])
+    
+    y_original[ind,z_index] <- yval
+    yval <- yval + 1
+  }
+  # Last level
+  ind <- Z[,z_index] > gamma_true[[z_index]][levels[z_index]-1]
+  y_original[ind,z_index] <- levels[z_index]
+  # First level
+  ind <- Z[,z_index] <= gamma_true[[z_index]][1]
+  y_original[ind,z_index] <- 1
+}
+```
+
+2. Making missing data and setting indicator matrix
+
+About 33% of $y_3$ and $y_4$ will be missing according to MAR.
+
+```{r}
+set.seed(0)
+# Make Z3 and Z4 MAR
+funcZ3 <- exp(Z[, 1] - 0.5*Z[, 2]-1.25)
+funcZ4 <- exp(-Z[, 1] + 0.5*Z[, 2]-1.25)
+missing_probZ3 <- funcZ3/(funcZ3 + 1)
+missing_probZ4 <- funcZ4/(funcZ4 + 1)
+
+# Create the missing indicator vector
+indicatorZ3 <- rbernoulli(n = n, p = missing_probZ3)
+indicatorZ4 <- rbernoulli(n = n, p = missing_probZ4)
+IndicatorMat <- cbind(rep(0,n), rep(0,n), indicatorZ3, indicatorZ4)
+
+# Create y matrix to be used in MCMC, impute missing value by 2
+y <- y_original
+y[indicatorZ3,3] <- NA
+y[indicatorZ4,4] <- NA
+```
+
+
+3. Do MCMC using our function
+```{r}
+source("../probitBayes.R")
+sampled_y <- probitBayesImputation(y)
+```
+
+
+Unpacking for comparison
+
+```{r}
+# unpack z for future analysis
+
+y3=sampled_y[,,3]
+y4=sampled_y[,,4]
+```
+
+Compare distributions
+
+```{r}
+# Original distribution without missing
+y3_original = y_original[,3]
+original_pmf = table(y3_original)/length(y3_original)
+
+# Observed distribution
+missing_indicator = indicatorZ3
+y3_observed = y_original[!missing_indicator,3]
+observed_pmf = table(y3_observed)/length(y3_observed)
+
+# Extract variable from imputed data
+y3_imputed = y3
+imputed_pmf = table(y3_imputed)/length(y3_imputed)
+
+df3 = rbind(original_pmf,observed_pmf,imputed_pmf)
+colnames(df3)<- c('cat 1', 'cat 2', 'cat 3', 'cat4', 'cat5')
+barplot(df3, xlab = 'Category', beside = TRUE, 
+        legend = TRUE, main = 'Blocked Gibbs Sampling Assessment: Y3',
+        ylim = c(0,0.5))
+```
+
+
+Compare distributions
+
+```{r}
+# Original distribution without missing
+y4_original = y_original[,4]
+original_pmf = table(y4_original)/length(y4_original)
+
+# Observed distribution
+missing_indicator = indicatorZ4
+y4_observed = y_original[!missing_indicator,4]
+observed_pmf = table(y4_observed)/length(y4_observed)
+
+# Extract variable from imputed data
+y4_imputed = y4
+imputed_pmf = table(y4_imputed)/length(y4_imputed)
+
+df4 = rbind(original_pmf,observed_pmf,imputed_pmf)
+colnames(df4)<- c('cat 1', 'cat 2', 'cat 3', 'cat4')
+barplot(df4, xlab = 'Category', beside = TRUE, 
+        legend = TRUE, main = 'Blocked Gibbs Sampling Assessment: Y4',
+        ylim = c(0,0.5))
+```
+
+* * *
+
+
+
