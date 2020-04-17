@@ -75,12 +75,12 @@ for (col in missing_col) {
 
 ```{r}
 source("../probitBayes.R")
-Mon = 100
-B = 10
-thin.init = 5
-
+N = 40
+Mon = 2000
+B = 300
+thin.int = 5
 # function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, seed = 0)
-sampled_y <- probitBayesImputation(df_observed, Mon, B, thin.init)
+sampled_y <- probitBayesImputation(df_observed, N, Mon, B, thin.int)
 ```
 
 * * *
