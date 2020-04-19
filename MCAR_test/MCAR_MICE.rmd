@@ -1,6 +1,6 @@
 
 ---
-title: "Testing different imputation methods on PUMS (MCAR) - MICE-CART"
+title: "Testing different imputation methods on PUMS (MCAR) - MICE"
 output:
   pdf_document: default
   html_document:
@@ -71,11 +71,11 @@ for (col in missing_col) {
 ```
 
 
-### MICE-CART
+### MICE
 Create 5 imputed dataset
 ```{r}
 library(mice)
-imputed_df <-  mice(df_observed,m=5,method="cart",print=F)
+imputed_df <-  mice(df_observed,m=5,print=F)
 ```
 
 Extract the 5 imputed dataset
