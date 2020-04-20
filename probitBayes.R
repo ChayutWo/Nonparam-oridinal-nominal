@@ -12,16 +12,24 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
   n <- nrow(y)
   IndicatorMat <- is.na(y)
 
-  # initially impute y with 2
-  y[is.na(y)] <- 2
-
   ####prior specification####
   
   # The cutoffs according to this paper can be arbitrarily set
   gamma.list = list()
   for (z_index in 1:R) {
-    numlevels <- length(unique(y[,z_index]))
-    gamma.list[[z_index]] <- c(-10000,0:(numlevels-2),10000)
+    numlevels <- sum(!is.na(unique(y[,z_index])))
+    n_miss <- sum(IndicatorMat[,z_index])
+    marginal_prob <- table(y[!IndicatorMat[,z_index],z_index])
+    marginal_prob <- marginal_prob/sum(marginal_prob)
+    # create cutoff that center at 0
+    if (mod(numlevels,2)==0) {
+      gamma.list[[z_index]] <- c(-10000,-as.integer(numlevels/2-1):as.integer(numlevels/2-1),10000)
+    } else {
+      gamma.list[[z_index]] <- c(-10000,seq(from = -(numlevels-2)/2, to=(numlevels-2)/2, by = 1 ), 10000)
+    }
+    # initially do random imputation from marginal pmf
+    y[IndicatorMat[,z_index],z_index] <- sample(1:numlevels, n_miss, 
+                                                replace = TRUE, prob = marginal_prob)
   }
 
   # >>>>>>>>>>>>>>>> operationalized  <<<<<<<<<
@@ -118,9 +126,8 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
   
   # initial guess for covariance matrix in NIW
   S.init=k.sigma.init[1:d,1:d]*(nu-1)
-  
+
   components.init=1
-  
   z.init=matrix(0,n,R)
   for (z_index in 1:R) {
     Ki = length(gamma.list[[z_index]])-1
@@ -129,12 +136,14 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     # right end
     z.init[which(y[, z_index]==Ki), z_index]=gamma.list[[z_index]][Ki]+1
     # middle zi = (gamma[i] + gamma[i+1])/2
-    for(i in 2:(Ki-1)){
-      z.init[which(y[, z_index]==i),z_index]=(gamma.list[[z_index]][i]+
-                                                gamma.list[[z_index]][i+1])/2
+    if (Ki>2) {
+      for(i in 2:(Ki-1)){
+        z.init[which(y[, z_index]==i),z_index]=(gamma.list[[z_index]][i]+
+                                                  gamma.list[[z_index]][i+1])/2
+      }
     }
   }
-  
+
   # save current value
   k.mu.cur=k.mu.init
   k.sigma.cur=k.sigma.init
@@ -243,6 +252,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     
     # Calculate p(Z|mu_l, Sigma_l) for each sample for each cluster = p(Z|L)
     norm.dens.list=lapply(meancov.list, function( item ) dmvnorm (z.cur, item[[1]], item[[2]]))
+
     # Turn that into a matrix of size 198x40: ij entry is p(Zi|L = j)
     norm.dens.mtrx=NULL
     for(j in 1:N){

@@ -74,7 +74,7 @@ Generate $Z \sim Normal(\mu, \Sigma)$ where:
 ```{r}
 # Set mean and covariance matrix for z
 set.seed(0)
-n <- 500
+n <- 1000
 R <- 4
 d <- 4
 
@@ -124,15 +124,9 @@ About 33% of $y_3$ and $y_4$ will be missing according to MAR.
 
 ```{r}
 set.seed(0)
-# Make Z3 and Z4 MAR
-funcZ3 <- exp(Z[, 1] - 0.5*Z[, 2]-1.25)
-funcZ4 <- exp(-Z[, 1] + 0.5*Z[, 2]-1.25)
-missing_probZ3 <- funcZ3/(funcZ3 + 1)
-missing_probZ4 <- funcZ4/(funcZ4 + 1)
-
 # Create the missing indicator vector
-indicatorZ3 <- rbernoulli(n = n, p = missing_probZ3)
-indicatorZ4 <- rbernoulli(n = n, p = missing_probZ4)
+indicatorZ3 <- rbernoulli(n = n, p = 0.45)
+indicatorZ4 <- rbernoulli(n = n, p = 0.45)
 IndicatorMat <- cbind(rep(0,n), rep(0,n), indicatorZ3, indicatorZ4)
 
 # Create y matrix to be used in MCMC, impute missing value by 2
@@ -146,7 +140,12 @@ y[indicatorZ4,4] <- NA
 ```{r}
 y <- data.frame(y)
 source("../probitBayes.R")
-sampled_y <- probitBayesImputation(y)
+N = 40
+Mon = 50
+B = 200
+thin.int = 5
+# function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, seed = 0)
+sampled_y <- probitBayesImputation(y, N, Mon, B, thin.int)
 ```
 
 
