@@ -1,0 +1,121 @@
+
+---
+title: "Dirichlet process mixture of products of multinomial distributions model (DPMPM)"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+```
+
+* * *
+
+1. Load data
+essay: df of the raw data
+grades: grade evaluated by different raters
+char: characteristics of each work
+
+```{r}
+essay=read.csv("../DeYoreoKottas_supp/essay.csv",header=FALSE)
+grades=essay[,1:5]
+char=essay[,7:12]
+names(char)=c("WL","SqW","PC","PS","PP","SL")
+```
+
+2. Extract features
+p: Number of X (Covariates)
+R: Number of Y (ordinal variables)
+n: number of samples
+x: df of covariate X
+y: df of ordinal var Y
+```{r}
+p=0
+R=3
+d=p+R
+
+n=nrow(essay)
+
+y=matrix(0,n,R)
+
+y[,1]=grades[,2]
+y[,2]=grades[,3]
+y[,3]=grades[,4]
+```
+
+3. Specify prior specification
+N: Number of cluster in primary stick breaking process (DP)
+R.x: Range of each covariates
+mid.x: mid point of each covariates (max+min)/2
+gamma1: cut off points of Y1
+gamma2: cut off points of Y2
+gamma3: cut off points of Y3
+K: number of groups in ordinal data (3 levels: low med high)
+R.z: range of z
+```{r}
+####prior specification####
+N=40
+Mon=500 # Final samples
+B=50 # Burn-in
+thin.int=10 # Thininig
+source("../probitBayes.R")
+sampled_z <- probitBayesImputation(data.frame(y), N, Mon, B, thin.int)
+z1=sampled_z[,,1]
+z2=sampled_z[,,2]
+z3=sampled_z[,,3]
+```
+
+```{r}
+sum(z1)
+sum(z2)
+sum(z3)
+```
+
+```{r}
+head(z1)
+```
+
+* * *
+
+
+

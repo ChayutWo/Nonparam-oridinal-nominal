@@ -400,5 +400,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
       }
     }
   }
-  return(sampled_y)
+  output_list <- list(sampled_y, sampled_z)
+  names(output_list) <- c('sampled_y', 'sampled_z')
+  return(output_list)
 }
