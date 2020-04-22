@@ -114,7 +114,7 @@ for (var_index in c(1,3,5,7,9,11)) {
   colnames(results)<- 1:dim(imputed_pmf)
   barplot(results, xlab = 'Category', beside = TRUE, 
           legend = TRUE, 
-          main = paste('Blocked Gibbs Sampling Assessment:', colnames(df)[var_index]))
+          main = paste('MICE:', colnames(df)[var_index]))
 }
 ```
 * * *
