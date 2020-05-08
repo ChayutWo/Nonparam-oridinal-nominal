@@ -86,11 +86,12 @@ d2 <-  complete(imputed_df, 2)
 d3 <-  complete(imputed_df, 3)
 d4 <-  complete(imputed_df, 4)
 d5 <-  complete(imputed_df, 5)
+imputed_sets = rbind(d1, d2, d3, d4, d5)
 ```
 
 Diagnostics
 
-```{r}
+```{r, echo = FALSE}
 for (var_index in c(1,3,5,7,9,11)) {
   y_original = df[,var_index]
   original_pmf = table(y_original)/length(y_original)
@@ -118,34 +119,70 @@ for (var_index in c(1,3,5,7,9,11)) {
 }
 ```
 
+
 Assess bivariate joint distribution
-```{r}
-# Compare joint distribution between var1 and var2 in the df
-for (var1 in c(1,3,5,7,9,11)) {
-  for (var2 in c(1,3,5,7,9,11)) {
-    if (var2 > var1) {
-      # Compute the joint pmf in the original dataframe without missing values
-      original_pmf = table(df[,var1], df[,var2])
-      original_pmf = original_pmf/sum(original_pmf)
+```{r, echo = FALSE}
+combinations = combn(1:11, 2)
+original_dist = c()
+imputed_dist = c()
+for (i in 1:(dim(combinations)[2])) {
+  variables = combinations[, i]
+  # Compute the joint pmf in the original dataframe without missing values
+  original_pmf = table(df[,variables])
+  original_pmf = original_pmf/sum(original_pmf)
       
-      # Compute the joint pmf in the imputed dataset and average over imputations
-      imputed_pmf = rbind(d1, d2, d3, d4, d5)
-      imputed_pmf = table(imputed_pmf[,var1], imputed_pmf[,var2])
-      imputed_pmf = imputed_pmf/sum(imputed_pmf)
-      
-      # Calculate r square which is just correlation
-      r2 = cor(matrix(original_pmf, ncol = 1), matrix(imputed_pmf, ncol = 1))
-      plot_title = paste('Bivariate pmf', 
-                         colnames(df)[var1], '&', colnames(df)[var2], 
-                         ', r square:', round(r2,3))
-      
-      plot(matrix(original_pmf, ncol = 1), matrix(imputed_pmf, ncol = 1), 
-           xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
-           main = plot_title)
-      abline(0,1, col = 'gray')
-    }
-  }
+  # Compute the joint pmf in the imputed dataset and average over imputations
+  imputed_pmf = table(imputed_sets[,variables])
+  imputed_pmf = imputed_pmf/sum(imputed_pmf)
+  
+  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
+  imputed_dist = rbind(imputed_dist, matrix(imputed_pmf, ncol = 1))
 }
+
+# Calculate r square which is just correlation
+r2 = cor(original_dist, imputed_dist)
+plot_title = paste('Bivariate pmf', 
+                   ', r square:', round(r2,3))
+
+plot(original_dist, imputed_dist, 
+     xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
+     main = plot_title)
+abline(0,1, col = 'gray')
+abline(0,1.1, col = 'red')
+abline(0, 0.9, col = 'red')
+```
+
+
+Assess trivariate joint distribution
+```{r, echo = FALSE}
+combinations = combn(1:11, 3)
+original_dist = c()
+imputed_dist = c()
+for (i in 1:(dim(combinations)[2])) {
+  variables = combinations[, i]
+  # Compute the joint pmf in the original dataframe without missing values
+  original_pmf = table(df[,variables])
+  original_pmf = original_pmf/sum(original_pmf)
+      
+  # Compute the joint pmf in the imputed dataset and average over imputations
+  imputed_pmf = table(imputed_sets[,variables])
+  imputed_pmf = imputed_pmf/sum(imputed_pmf)
+  
+  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
+  imputed_dist = rbind(imputed_dist, matrix(imputed_pmf, ncol = 1))
+}
+
+# Calculate r square which is just correlation
+r2 = cor(original_dist, imputed_dist)
+plot_title = paste('Trivariate pmf', 
+                   ', r square:', round(r2,3))
+
+plot(original_dist, imputed_dist, 
+     xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
+     main = plot_title)
+abline(0,1, col = 'gray')
+abline(0,1.1, col = 'red')
+abline(0, 0.9, col = 'red')
 ```
 * * *
 
