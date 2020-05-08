@@ -14,7 +14,7 @@ from tqdm import tqdm
 from utils import normalization, renormalization, rounding
 from utils import xavier_init
 from utils import binary_sampler, uniform_sampler, sample_batch_index
-
+from plot_loss import plot_loss
 
 def gain (data_x, gain_parameters):
   '''Impute missing values in data_x
@@ -145,6 +145,8 @@ def gain (data_x, gain_parameters):
   sess.run(tf.global_variables_initializer())
    
   # Start Iterations
+  generator_loss = []
+  discriminator_loss = []
   for it in tqdm(range(iterations)):    
       
     # Sample batch
@@ -165,7 +167,13 @@ def gain (data_x, gain_parameters):
     _, G_loss_curr, MSE_loss_curr = \
     sess.run([G_solver, G_loss_temp, MSE_loss],
              feed_dict = {X: X_mb, M: M_mb, H: H_mb})
-            
+    # save current loss
+    generator_loss.append(G_loss_curr+alpha*MSE_loss_curr)
+    discriminator_loss.append(D_loss_curr)
+
+  ## save learning progression as a figure
+  plot_loss(generator_loss, discriminator_loss)
+
   ## Return imputed data      
   Z_mb = uniform_sampler(0, 0.01, no, dim) 
   M_mb = data_m

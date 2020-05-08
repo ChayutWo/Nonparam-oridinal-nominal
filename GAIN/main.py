@@ -18,7 +18,6 @@ from missingdata_loader import data_loader
 from gain import gain
 from utils import rmse_loss
 
-
 def main (args):
   '''Main function for PUMS datasets.
   
