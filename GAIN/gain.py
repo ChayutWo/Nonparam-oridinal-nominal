@@ -16,11 +16,12 @@ from utils import xavier_init
 from utils import binary_sampler, uniform_sampler, sample_batch_index
 from plot_loss import plot_loss
 
-def gain (data_x, gain_parameters):
+def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
   '''Impute missing values in data_x
   
   Args:
     - data_x: original data with missing values
+    = num_imputations: number of imputed data set to be saved (multiple imputation)
     - gain_parameters: GAIN network parameters:
       - batch_size: Batch size
       - hint_rate: Hint rate
@@ -172,22 +173,32 @@ def gain (data_x, gain_parameters):
     discriminator_loss.append(D_loss_curr)
 
   ## save learning progression as a figure
+  print('>>> exporting learning curve')
   plot_loss(generator_loss, discriminator_loss)
 
-  ## Return imputed data      
-  Z_mb = uniform_sampler(0, 0.01, no, dim) 
-  M_mb = data_m
-  X_mb = norm_data_x          
-  X_mb = M_mb * X_mb + (1-M_mb) * Z_mb 
-      
-  imputed_data = sess.run([G_sample], feed_dict = {X: X_mb, M: M_mb})[0]
-  
-  imputed_data = data_m * norm_data_x + (1-data_m) * imputed_data
-  
-  # Renormalization
-  imputed_data = renormalization(imputed_data, norm_parameters)  
-  
-  # Rounding
-  imputed_data = rounding(imputed_data, data_x)  
-          
-  return imputed_data
+  multiple_imputation = []
+  for imputation_index in range(num_imputations):
+
+    ## Return imputed data
+    Z_mb = uniform_sampler(0, 0.01, no, dim)
+    M_mb = data_m
+    X_mb = norm_data_x
+    X_mb = M_mb * X_mb + (1-M_mb) * Z_mb
+
+    imputed_data = sess.run([G_sample], feed_dict = {X: X_mb, M: M_mb})[0]
+
+    imputed_data = data_m * norm_data_x + (1-data_m) * imputed_data
+
+    # Renormalization
+    imputed_data = renormalization(imputed_data, norm_parameters)
+
+    # Rounding
+    imputed_data = rounding(imputed_data, data_x)
+
+    # save result
+    filepath = './imputed_dataset/'+filename+'_'+str(imputation_index+1)+'.csv'
+    print('>>> saving imputed dataset: ' + filepath)
+    np.savetxt(filepath, imputed_data, delimiter = ',')
+
+    multiple_imputation.append(imputed_data)
+  return multiple_imputation

@@ -36,7 +36,7 @@ def main (args):
 
   data_name = args.data_name
   missing_data_name = args.missing_data_name
-  
+  num_imputations = args.num_imputations
   gain_parameters = {'batch_size': args.batch_size,
                      'hint_rate': args.hint_rate,
                      'alpha': args.alpha,
@@ -46,11 +46,13 @@ def main (args):
   ori_data_x, miss_data_x, data_m = data_loader(missing_data_name, data_name)
   
   # Impute missing data
-  imputed_data_x = gain(miss_data_x, gain_parameters)
-  
+  imputed_data_x = gain(miss_data_x, num_imputations, gain_parameters, filename = data_name)
+
   # Report the RMSE performance
-  rmse = rmse_loss (ori_data_x, imputed_data_x, data_m)
-  
+  rmse = 0
+  for i in range(num_imputations):
+    rmse += rmse_loss(ori_data_x, imputed_data_x[i], data_m)
+  rmse = rmse/num_imputations
   print()
   print('RMSE Performance: ' + str(np.round(rmse, 4)))
   
@@ -60,7 +62,7 @@ if __name__ == '__main__':
   """
   Example call:
   python3 main.py --data_name PUMS_test --missing_data_name MCAR_PUMS_test 
-  --batch_size 128 --hint_rate 0.9 --alpha 100 --iterations 10000
+  --num_imputations 5 --batch_size 128 --hint_rate 0.9 --alpha 100 --iterations 10000
   """
   # Inputs for the main function
   parser = argparse.ArgumentParser()
@@ -71,6 +73,11 @@ if __name__ == '__main__':
   parser.add_argument(
       '--missing_data_name',
       type=str)
+  parser.add_argument(
+      '--num_imputations',
+      default=1,
+      type=int
+  )
   parser.add_argument(
       '--batch_size',
       help='the number of samples in mini-batch',
