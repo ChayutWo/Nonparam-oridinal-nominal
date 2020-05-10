@@ -176,7 +176,6 @@ Assess bivariate joint distribution
 combinations = combn(1:11, 2)
 original_dist = c()
 imputed_dist = c()
-df$RMSP <- as.factor(df$RMSP)
 levels = c(7,7,7,19,5,4,7,2,17,3,13)
 for (i in 1:(dim(combinations)[2])) {
   variables = combinations[, i]

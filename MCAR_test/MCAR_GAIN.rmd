@@ -1,6 +1,6 @@
 
 ---
-title: "Testing different imputation methods on PUMS (MCAR) - MICE"
+title: "Testing different imputation methods on PUMS (MCAR)"
 output:
   pdf_document: default
   html_document:
@@ -36,7 +36,6 @@ library(broom)
 library(boot)
 library(ggplot2)
 library(cobalt)
-require(tidyverse)
 require(rstanarm)
 require(magrittr)
 require(rstan)
@@ -45,12 +44,12 @@ library(abind)
 library(matrixStats)
 library(truncnorm)
 library(mvtnorm)
-library(MCMCpack)
 library(mnormt)
 library(coda)
 ```
 
 * * *
+
 ```{r}
 # load dataset: df
 load('../Datasets/ordinalPUMS.Rdata')
@@ -72,21 +71,23 @@ for (col in missing_col) {
 ```
 
 
-### MICE
-Create 5 imputed dataset
-```{r}
-library(mice)
-imputed_df <-  mice(df_observed,m=5,print=F)
-```
+### Generative Adversarial Imputation Nets (GAIN)
 
-Extract the 5 imputed dataset
+reference: https://arxiv.org/abs/1806.02920
+
 ```{r}
-d1 <-  complete(imputed_df, 1)
-d2 <-  complete(imputed_df, 2)
-d3 <-  complete(imputed_df, 3)
-d4 <-  complete(imputed_df, 4)
-d5 <-  complete(imputed_df, 5)
-imputed_sets = rbind(d1, d2, d3, d4, d5)
+# Load imputed dataset
+d1 = read.csv('../GAIN/imputed_dataset/PUMS_test_1.csv', header = FALSE, sep = ',')
+d2 = read.csv('../GAIN/imputed_dataset/PUMS_test_2.csv', header = FALSE, sep = ',')
+d3 = read.csv('../GAIN/imputed_dataset/PUMS_test_3.csv', header = FALSE, sep = ',')
+d4 = read.csv('../GAIN/imputed_dataset/PUMS_test_4.csv', header = FALSE, sep = ',')
+d5 = read.csv('../GAIN/imputed_dataset/PUMS_test_5.csv', header = FALSE, sep = ',')
+colnames(d1) = colnames(df)
+colnames(d2) = colnames(df)
+colnames(d3) = colnames(df)
+colnames(d4) = colnames(df)
+colnames(d5) = colnames(df)
+imputed_df = rbind(d1, d2, d3, d4, d5)
 ```
 
 Diagnostics
@@ -102,14 +103,7 @@ for (var_index in c(1,3,5,7,9,11)) {
   observed_pmf = table(y_observed)/length(y_observed)
   
   # Extract variable from imputed data
-  sample_estimate1 = table(d1[,var_index])/length(d1[,var_index])
-  sample_estimate2 = table(d2[,var_index])/length(d2[,var_index])
-  sample_estimate3 = table(d3[,var_index])/length(d3[,var_index])
-  sample_estimate4 = table(d4[,var_index])/length(d4[,var_index])
-  sample_estimate5 = table(d5[,var_index])/length(d5[,var_index])
-  
-  imputed_pmf = (sample_estimate1 + sample_estimate2 + sample_estimate3 +
-                   sample_estimate4 + sample_estimate5)/5
+  imputed_pmf = table(imputed_df[, var_index])/length(imputed_df[, var_index])
   
   results = rbind(original_pmf,observed_pmf,imputed_pmf)
   colnames(results)<- 1:dim(imputed_pmf)
@@ -119,12 +113,13 @@ for (var_index in c(1,3,5,7,9,11)) {
 }
 ```
 
-
 Assess bivariate joint distribution
 ```{r, echo = FALSE}
 combinations = combn(1:11, 2)
 original_dist = c()
 imputed_dist = c()
+levels = c(7,7,7,19,5,4,7,2,17,3,13)
+
 for (i in 1:(dim(combinations)[2])) {
   variables = combinations[, i]
   # Compute the joint pmf in the original dataframe without missing values
@@ -132,7 +127,10 @@ for (i in 1:(dim(combinations)[2])) {
   original_pmf = original_pmf/sum(original_pmf)
       
   # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(imputed_sets[,variables])
+  imputed_pmf = table(factor(imputed_df[,variables[1]], 
+                                levels = 1:(levels[variables[1]])),
+                      factor(imputed_df[,variables[2]] ,
+                                levels = 1:(levels[variables[2]])))
   imputed_pmf = imputed_pmf/sum(imputed_pmf)
   
   original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
@@ -152,12 +150,13 @@ abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
 ```
 
-
-Assess trivariate joint distribution
+Assess bivariate joint distribution
 ```{r, echo = FALSE}
 combinations = combn(1:11, 3)
 original_dist = c()
 imputed_dist = c()
+levels = c(7,7,7,19,5,4,7,2,17,3,13)
+
 for (i in 1:(dim(combinations)[2])) {
   variables = combinations[, i]
   # Compute the joint pmf in the original dataframe without missing values
@@ -165,7 +164,12 @@ for (i in 1:(dim(combinations)[2])) {
   original_pmf = original_pmf/sum(original_pmf)
       
   # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(imputed_sets[,variables])
+  imputed_pmf = table(factor(imputed_df[,variables[1]], 
+                                levels = 1:(levels[variables[1]])),
+                      factor(imputed_df[,variables[2]],
+                                levels = 1:(levels[variables[2]])),
+                      factor(imputed_df[,variables[3]],
+                                levels = 1:(levels[variables[3]])))
   imputed_pmf = imputed_pmf/sum(imputed_pmf)
   
   original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
@@ -195,12 +199,14 @@ rmse = sqrt(sum((numeric_df[missing_matrix] - numeric_impute[missing_matrix])^2)
 rmse
 ```
 
+
 ```{r}
 # Actual vs Imputed values
 col = 1
 missing_indicator = missing_matrix[,col]
 plot(as.integer(df[missing_indicator, col]), as.integer(d1[missing_indicator, col]), xlab = 'actual values', ylab = 'imputed values', main = paste('Actual vs Imputed values: ', colnames(df)[col]))
 ```
+
 * * *
 
 

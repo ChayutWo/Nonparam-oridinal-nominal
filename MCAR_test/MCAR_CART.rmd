@@ -182,6 +182,24 @@ abline(0,1, col = 'gray')
 abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
 ```
+
+```{r}
+# calculate rmse
+numeric_df = sapply(df, as.numeric)
+numeric_impute = sapply(d1, as.numeric)
+missing_matrix = is.na(df_observed)
+
+rmse = sqrt(sum((numeric_df[missing_matrix] - numeric_impute[missing_matrix])^2)/sum(missing_matrix))
+rmse
+```
+
+```{r}
+# Actual vs Imputed values
+col = 1
+missing_indicator = missing_matrix[,col]
+plot(as.integer(df[missing_indicator, col]), as.integer(d1[missing_indicator, col]), xlab = 'actual values', ylab = 'imputed values', main = paste('Actual vs Imputed values: ', colnames(df)[col]))
+```
+
 * * *
 
 
