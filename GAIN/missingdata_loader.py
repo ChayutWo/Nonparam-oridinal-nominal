@@ -23,16 +23,15 @@ def data_loader (missing_data_name, data_name = None):
 
   # Load data with NA values
   file_name = '../Datasets/PUMS_missing/'+missing_data_name+'.csv'
-  miss_data_x = pd.read_csv(file_name, index_col=False, na_values='NA')
+  miss_data_x = pd.read_csv(file_name, index_col=False, na_values='NA', dtype=np.float64)
   miss_data_x = miss_data_x.values
   if data_name is not None:
     # Load data without NA values
     file_name = '../Datasets/PUMS_missing/'+data_name+'.csv'
-    data_x = pd.read_csv(file_name, index_col=False, na_values='NA')
+    data_x = pd.read_csv(file_name, index_col=False, na_values='NA', dtype=np.float64)
     data_x = data_x.values
   else:
     data_x = None
 
   data_m = 1-np.isnan(miss_data_x)
-
   return data_x, miss_data_x, data_m

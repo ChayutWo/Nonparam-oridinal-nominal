@@ -39,8 +39,7 @@ def normalization (data):
     min_val[i] = np.nanmin(norm_data[:,i])
     norm_data[:,i] = norm_data[:,i] - np.nanmin(norm_data[:,i])
     max_val[i] = np.nanmax(norm_data[:,i])
-    norm_data[:,i] = norm_data[:,i] / (np.nanmax(norm_data[:,i]) + 1e-6)   
-    
+    norm_data[:,i] = norm_data[:,i] / (np.nanmax(norm_data[:,i]) + 1e-6)
   # Return norm_parameters for renormalization
   norm_parameters = {'min_val': min_val,
                      'max_val': max_val}
@@ -106,14 +105,12 @@ def rmse_loss (ori_data, imputed_data, data_m):
   Returns:
     - rmse: Root Mean Squared Error
   '''
-  
   ori_data, _ = normalization(ori_data)
   imputed_data, _ = normalization(imputed_data)
-    
   # Only for missing values
   nominator = np.sum(((1-data_m) * ori_data - (1-data_m) * imputed_data)**2)
   denominator = np.sum(1-data_m)
-  
+
   rmse = np.sqrt(nominator/float(denominator))
   
   return rmse
