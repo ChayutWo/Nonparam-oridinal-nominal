@@ -1,6 +1,6 @@
 
 ---
-title: "Testing different imputation methods on PUMS (MCAR)"
+title: "Testing different imputation methods on PUMS (MCAR) - Generative Adversarial Imputation Nets (GAIN)"
 output:
   pdf_document: default
   html_document:
@@ -189,7 +189,6 @@ abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
 ```
 
-
 ```{r}
 # calculate rmse
 numeric_df = sapply(df, as.numeric)
@@ -204,11 +203,19 @@ rmse
 ```
 
 ```{r}
+# accuracy
+acc = sum(numeric_df[missing_matrix] == numeric_impute[missing_matrix])/sum(missing_matrix)
+acc
+```
+
+
+```{r}
 # Actual vs Imputed values
 col = 1
 missing_indicator = missing_matrix[,col]
 plot(as.integer(df[missing_indicator, col]), as.integer(d1[missing_indicator, col]), xlab = 'actual values', ylab = 'imputed values', main = paste('Actual vs Imputed values: ', colnames(df)[col]))
 ```
+
 
 * * *
 

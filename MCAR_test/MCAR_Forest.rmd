@@ -186,7 +186,7 @@ abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
 ```
 
-```{r}
+```{r, echo = FALSE}
 # calculate rmse
 numeric_df = sapply(df, as.numeric)
 normalized_df = t(t(numeric_df-1)/(apply(numeric_df, MARGIN = 2, FUN = max)-1))
@@ -196,7 +196,14 @@ normalized_impute = t(t(numeric_impute-1)/(apply(numeric_df, MARGIN = 2, FUN = m
 missing_matrix = is.na(df_observed)
 
 rmse = sqrt(sum((normalized_df[missing_matrix] - normalized_impute[missing_matrix])^2)/sum(missing_matrix))
+print('rmse')
 rmse
+```
+
+```{r}
+# accuracy
+acc = sum(numeric_df[missing_matrix] == numeric_impute[missing_matrix])/sum(missing_matrix)
+acc
 ```
 
 ```{r}
