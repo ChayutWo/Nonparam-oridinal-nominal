@@ -1,0 +1,231 @@
+
+---
+title: "Testing different imputation methods on PUMS (MCAR) - Random imputation"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(mnormt)
+library(coda)
+```
+
+* * *
+
+```{r}
+# load dataset: df
+load('../Datasets/ordinalPUMS.Rdata')
+
+# take 10,000 samples: df
+set.seed(0)
+n = 10000
+sample <- sample(nrow(df), size = 10000)
+df <- df[sample,]
+
+# create MCAR scneario with 30% chance of missing: df_observed
+missing_prob = 0.3
+df_observed <- df
+missing_col = colnames(df)[c(1,3,5,7,9,11)]
+for (col in missing_col) {
+  missing_ind <- rbernoulli(n,p = missing_prob)
+  df_observed[missing_ind, col] <- NA
+}
+```
+
+
+### Random imputation
+
+Using uniform pmf for missing data imputation
+
+```{r}
+random_imputation <- function(data){
+  # Missing data imputation with uniform pmf
+  # data: dataframe with missing values
+  d = data
+  missing_matrix = is.na(d)
+  for (col in 1:dim(d)[2]) {
+    # impute with random value
+    pmf = rep(1/length(table(d[,col])),length(table(d[,col])))
+    missing_indicator = missing_matrix[,col]
+    
+    n_missing = sum(missing_indicator)
+    sample = rmultinom(n_missing,1,prob = pmf)
+    d[missing_indicator,col] = apply(sample*(1:nrow(sample)), 
+                                        MARGIN = 2, FUN = sum)
+  }
+  # return imputed dataset
+  return(d)
+}
+```
+
+
+```{r}
+# do random imputation 5 times
+d1 = random_imputation(df_observed)
+d2 = random_imputation(df_observed)
+d3 = random_imputation(df_observed)
+d4 = random_imputation(df_observed)
+d5 = random_imputation(df_observed)
+imputed_df = rbind(d1, d2, d3, d4, d5)
+```
+
+Diagnostics
+
+```{r, echo = FALSE}
+for (var_index in c(1,3,5,7,9,11)) {
+  y_original = df[,var_index]
+  original_pmf = table(y_original)/length(y_original)
+  
+  # Observed distribution
+  missing_indicator = is.na(df_observed)[,var_index]
+  y_observed = y_original[!missing_indicator]
+  observed_pmf = table(y_observed)/length(y_observed)
+  
+  # Extract variable from imputed data
+  imputed_pmf = table(imputed_df[, var_index])/length(imputed_df[, var_index])
+  
+  results = rbind(original_pmf,observed_pmf,imputed_pmf)
+  colnames(results)<- 1:dim(imputed_pmf)
+  barplot(results, xlab = 'Category', beside = TRUE, 
+          legend = TRUE, 
+          main = paste('MICE:', colnames(df)[var_index]))
+}
+```
+
+Assess bivariate joint distribution
+```{r, echo = FALSE}
+combinations = combn(1:11, 2)
+original_dist = c()
+imputed_dist = c()
+levels = c(7,7,7,19,5,4,7,2,17,3,13)
+
+for (i in 1:(dim(combinations)[2])) {
+  variables = combinations[, i]
+  # Compute the joint pmf in the original dataframe without missing values
+  original_pmf = table(df[,variables])
+  original_pmf = original_pmf/sum(original_pmf)
+      
+  # Compute the joint pmf in the imputed dataset and average over imputations
+  imputed_pmf = table(factor(imputed_df[,variables[1]], 
+                                levels = 1:(levels[variables[1]])),
+                      factor(imputed_df[,variables[2]] ,
+                                levels = 1:(levels[variables[2]])))
+  imputed_pmf = imputed_pmf/sum(imputed_pmf)
+  
+  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
+  imputed_dist = rbind(imputed_dist, matrix(imputed_pmf, ncol = 1))
+}
+
+# Calculate r square which is just correlation
+r2 = cor(original_dist, imputed_dist)
+plot_title = paste('Bivariate pmf', 
+                   ', r square:', round(r2,3))
+
+plot(original_dist, imputed_dist, 
+     xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
+     main = plot_title)
+abline(0,1, col = 'gray')
+abline(0,1.1, col = 'red')
+abline(0, 0.9, col = 'red')
+```
+
+Assess bivariate joint distribution
+```{r, echo = FALSE}
+combinations = combn(1:11, 3)
+original_dist = c()
+imputed_dist = c()
+levels = c(7,7,7,19,5,4,7,2,17,3,13)
+
+for (i in 1:(dim(combinations)[2])) {
+  variables = combinations[, i]
+  # Compute the joint pmf in the original dataframe without missing values
+  original_pmf = table(df[,variables])
+  original_pmf = original_pmf/sum(original_pmf)
+      
+  # Compute the joint pmf in the imputed dataset and average over imputations
+  imputed_pmf = table(factor(imputed_df[,variables[1]], 
+                                levels = 1:(levels[variables[1]])),
+                      factor(imputed_df[,variables[2]],
+                                levels = 1:(levels[variables[2]])),
+                      factor(imputed_df[,variables[3]],
+                                levels = 1:(levels[variables[3]])))
+  imputed_pmf = imputed_pmf/sum(imputed_pmf)
+  
+  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
+  imputed_dist = rbind(imputed_dist, matrix(imputed_pmf, ncol = 1))
+}
+
+# Calculate r square which is just correlation
+r2 = cor(original_dist, imputed_dist)
+plot_title = paste('Trivariate pmf', 
+                   ', r square:', round(r2,3))
+
+plot(original_dist, imputed_dist, 
+     xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
+     main = plot_title)
+abline(0,1, col = 'gray')
+abline(0,1.1, col = 'red')
+abline(0, 0.9, col = 'red')
+```
+
+```{r}
+# calculate rmse
+numeric_df = sapply(df, as.numeric)
+normalized_df = t(t(numeric_df-1)/(apply(numeric_df, MARGIN = 2, FUN = max)-1))
+numeric_impute = sapply(d1, as.numeric)
+normalized_impute = t(t(numeric_impute-1)/(apply(numeric_df, MARGIN = 2, FUN = max)-1))
+
+missing_matrix = is.na(df_observed)
+
+rmse = sqrt(sum((normalized_df[missing_matrix] - normalized_impute[missing_matrix])^2)/sum(missing_matrix))
+rmse
+```
+
+```{r}
+# accuracy
+acc = sum(numeric_df[missing_matrix] == numeric_impute[missing_matrix])/sum(missing_matrix)
+acc
+```
+
+* * *
+
+
+
