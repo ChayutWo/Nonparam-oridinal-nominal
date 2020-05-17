@@ -46,7 +46,7 @@ def main (args):
   ori_data_x, miss_data_x, data_m = data_loader(missing_data_name, data_name)
   
   # Impute missing data
-  imputed_data_x = gain(miss_data_x, num_imputations, gain_parameters, filename = data_name)
+  imputed_data_x = gain(miss_data_x, num_imputations, gain_parameters, filename = missing_data_name)
 
   # Report the RMSE performance
   rmse = 0
@@ -61,7 +61,7 @@ def main (args):
 if __name__ == '__main__':  
   """
   Example call:
-  python3 main.py --data_name PUMS_test --missing_data_name MCAR_PUMS_test 
+  python3 main.py --data_name PUMS01 --missing_data_name MCAR_PUMS01_30percent 
   --num_imputations 5 --batch_size 128 --hint_rate 0.9 --alpha 100 --iterations 10000
   """
   # Inputs for the main function
