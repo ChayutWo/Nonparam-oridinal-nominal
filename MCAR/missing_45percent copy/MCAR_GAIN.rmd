@@ -1,6 +1,6 @@
 
 ---
-title: "Testing different imputation methods on PUMS (MCAR) - DPMPM"
+title: "Testing different imputation methods on PUMS (MCAR) - Generative Adversarial Imputation Nets (GAIN)"
 output:
   pdf_document: default
   html_document:
@@ -36,7 +36,6 @@ library(broom)
 library(boot)
 library(ggplot2)
 library(cobalt)
-require(tidyverse)
 require(rstanarm)
 require(magrittr)
 require(rstan)
@@ -45,13 +44,12 @@ library(abind)
 library(matrixStats)
 library(truncnorm)
 library(mvtnorm)
-library(MCMCpack)
 library(mnormt)
 library(coda)
-library(NPBayesImputeCat)
 ```
 
 * * *
+
 ```{r}
 # load dataset: df
 load('../../Datasets/ordinalPUMS.Rdata')
@@ -63,7 +61,7 @@ sample <- sample(nrow(df), size = 10000)
 df <- df[sample,]
 
 # create MCAR scneario with 30% chance of missing: df_observed
-missing_prob = 0.3
+missing_prob = 0.45
 df_observed <- df
 missing_col = c(1,3,7,9,10,11)
 for (col in missing_col) {
@@ -73,63 +71,23 @@ for (col in missing_col) {
 ```
 
 
-### DPMPM
+### Generative Adversarial Imputation Nets (GAIN)
 
-Multiple imputation using NPBayesImputeCat package
-
-Ref: https://cran.r-project.org/web/packages/NPBayesImputeCat/NPBayesImputeCat.pdf
-
-1. Create and initialize the Rcpp_Lcm model object using CreateModel with the following arguments:
-  - X: dataframe to be imptuted = df
-  - MCZ: dataframe with the definition of structural zero = NULL
-  - K: the maximum number of mixture components = 40
-  - Nmax: An upper truncation limit for the augmented sample size = 0
-  - aalpha: the hyper parameter alpha in stick-breaking prior = 0.25
-  - balpha: the hyper parameter beta in stick-breaking prior = 0.25
-  - seed = 0
-
-2. Set the tracer for the sampling process
-  - k_star: the effective cluster number
-  - psi: conditional multinomial probabilties
-  - ImputedX: imputation result
-
-3. Run the model using the method Run of Rcpp_Lcm class with the following arguments:
-  - burnin = 10000
-  - iter = 10000
-  - thinning = 5
-
-4. Obtain result
-
-```{r, results = 'hide'}
-N = 40
-Mon = 10000
-B = 10000
-thin.int = 5
-
-# 1. Create and initialize the Rcpp_Lcm model object
-model = CreateModel(X = df_observed, MCZ = NULL, K = N, Nmax = 0,
-                    aalpha = 0.25, balpha = 0.25, seed = 0)
-# 2. Set tracer
-model$SetTrace(c('k_star', 'psi', 'ImputedX', 'alpha'),Mon)
-
-# 3. Run model using Run(burnin, iter, thinning)
-model$Run(B,Mon,thin.int)
-```
-
+reference: https://arxiv.org/abs/1806.02920
 
 ```{r}
-# Extract results
-output <- model$GetTrace()
-k_star <- output$k_star
-psi <- output$psi
-imputed_df <- output$ImputedX
-alpha <- output$alpha
-
-#retrieve parameters from the final iteration 
-result <- model$snapshot
-
-#convert ImputedX matrix to dataframe, using proper factors/names etc. 
-ImputedX <- GetDataFrame(result$ImputedX,df)
+# Load imputed dataset
+d1 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_45percent_1.csv', header = FALSE, sep = ',')
+d2 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_45percent_2.csv', header = FALSE, sep = ',')
+d3 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_45percent_3.csv', header = FALSE, sep = ',')
+d4 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_45percent_4.csv', header = FALSE, sep = ',')
+d5 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_45percent_5.csv', header = FALSE, sep = ',')
+colnames(d1) = colnames(df)
+colnames(d2) = colnames(df)
+colnames(d3) = colnames(df)
+colnames(d4) = colnames(df)
+colnames(d5) = colnames(df)
+imputed_df = rbind(d1, d2, d3, d4, d5)
 ```
 
 Diagnostics
@@ -145,30 +103,14 @@ for (var_index in missing_col) {
   observed_pmf = table(y_observed)/length(y_observed)
   
   # Extract variable from imputed data
-  imputed_pmf = table(imputed_df[,seq(var_index, dim(imputed_df)[2], dim(df)[2])])
-  imputed_pmf = imputed_pmf/sum(imputed_pmf)
+  imputed_pmf = table(imputed_df[, var_index])/length(imputed_df[, var_index])
   
   results = rbind(original_pmf,observed_pmf,imputed_pmf)
   colnames(results)<- 1:dim(imputed_pmf)
   barplot(results, xlab = 'Category', beside = TRUE, 
           legend = TRUE, 
-          main = paste('Blocked Gibbs Sampling Assessment:', colnames(df)[var_index]))
+          main = paste('MICE:', colnames(df)[var_index]))
 }
-```
-
-
-```{r, echo = FALSE}
-# The number of clusters/latent groups used
-plot(1:length(k_star), k_star, xlab = 'trials', 
-     ylab = 'number of active clusters', 
-     main = 'Number of clusters used over time', ylim = c(0,40))
-```
-
-```{r, echo = FALSE}
-# sampled alpha value for the stick breaking process
-plot(1:length(alpha), alpha, xlab = 'trials', 
-     ylab = 'alpha', type = 'l',
-     main = 'alpha value for the stick breaking process')
 ```
 
 Assess bivariate joint distribution
@@ -177,6 +119,7 @@ combinations = combn(1:11, 2)
 original_dist = c()
 imputed_dist = c()
 levels = c(7,7,7,19,5,4,7,2,17,3,13)
+
 for (i in 1:(dim(combinations)[2])) {
   variables = combinations[, i]
   # Compute the joint pmf in the original dataframe without missing values
@@ -184,13 +127,10 @@ for (i in 1:(dim(combinations)[2])) {
   original_pmf = original_pmf/sum(original_pmf)
       
   # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(factor(imputed_df[,seq(variables[1], 
-                                                dim(imputed_df)[2], dim(df)[2])], 
-                                levels = 0:(levels[variables[1]]-1)),
-                      factor(imputed_df[,seq(variables[2], 
-                                                dim(imputed_df)[2], dim(df)[2])] ,
-                                levels = 0:(levels[variables[2]]-1)))
-                      
+  imputed_pmf = table(factor(imputed_df[,variables[1]], 
+                                levels = 1:(levels[variables[1]])),
+                      factor(imputed_df[,variables[2]] ,
+                                levels = 1:(levels[variables[2]])))
   imputed_pmf = imputed_pmf/sum(imputed_pmf)
   
   original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
@@ -199,18 +139,19 @@ for (i in 1:(dim(combinations)[2])) {
 
 plot(original_dist, imputed_dist, 
      xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
-     main = "Bivariate pmf")
+     main = 'Bivariate pmf')
 abline(0,1, col = 'gray')
 abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
 ```
 
-Assess trivariate joint distribution
+Assess bivariate joint distribution
 ```{r, echo = FALSE}
 combinations = combn(1:11, 3)
 original_dist = c()
 imputed_dist = c()
 levels = c(7,7,7,19,5,4,7,2,17,3,13)
+
 for (i in 1:(dim(combinations)[2])) {
   variables = combinations[, i]
   # Compute the joint pmf in the original dataframe without missing values
@@ -218,16 +159,12 @@ for (i in 1:(dim(combinations)[2])) {
   original_pmf = original_pmf/sum(original_pmf)
       
   # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(factor(imputed_df[,seq(variables[1], 
-                                                dim(imputed_df)[2], dim(df)[2])], 
-                                levels = 0:(levels[variables[1]]-1)),
-                      factor(imputed_df[,seq(variables[2], 
-                                                dim(imputed_df)[2], dim(df)[2])] ,
-                                levels = 0:(levels[variables[2]]-1)),
-                      factor(imputed_df[,seq(variables[3], 
-                                                dim(imputed_df)[2], dim(df)[2])] ,
-                                levels = 0:(levels[variables[3]]-1)))
-                      
+  imputed_pmf = table(factor(imputed_df[,variables[1]], 
+                                levels = 1:(levels[variables[1]])),
+                      factor(imputed_df[,variables[2]],
+                                levels = 1:(levels[variables[2]])),
+                      factor(imputed_df[,variables[3]],
+                                levels = 1:(levels[variables[3]])))
   imputed_pmf = imputed_pmf/sum(imputed_pmf)
   
   original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
@@ -242,6 +179,39 @@ abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
 ```
 
+```{r}
+# calculate rmse
+numeric_df = sapply(df, as.numeric)
+normalized_df = t(t(numeric_df-1)/(apply(numeric_df, MARGIN = 2, FUN = max)-1))
+numeric_impute = sapply(d1, as.numeric)
+normalized_impute = t(t(numeric_impute-1)/(apply(numeric_df, MARGIN = 2, FUN = max)-1))
+
+missing_matrix = is.na(df_observed)
+
+rmse = sqrt(sum((normalized_df[missing_matrix] - normalized_impute[missing_matrix])^2)/sum(missing_matrix))
+rmse
+```
+
+```{r, echo = FALSE, include = FALSE}
+for (var_index in missing_col) {
+  y_original = df[,var_index]
+  original_pmf = table(y_original)
+  
+  # Observed distribution
+  missing_indicator = is.na(df_observed)[,var_index]
+  y_observed = y_original[!missing_indicator]
+  observed_pmf = table(y_observed)
+  
+  # Extract variable from imputed data
+  imputed_pmf = table(imputed_df[, var_index])/5
+  
+  results = rbind(original_pmf,observed_pmf,imputed_pmf)
+  colnames(results)<- 1:dim(imputed_pmf)
+  barplot(results, xlab = 'Category', beside = TRUE, 
+          legend = TRUE, 
+          main = paste('MICE:', colnames(df)[var_index]))
+}
+```
 * * *
 
 
