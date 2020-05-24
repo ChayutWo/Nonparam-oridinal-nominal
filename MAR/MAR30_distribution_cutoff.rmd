@@ -1,6 +1,6 @@
 
 ---
-title: "Testing different imputation methods on PUMS (MAR) - MICE-CART"
+title: "Testing different imputation methods on PUMS (MAR)"
 output:
   pdf_document: default
   html_document:
