@@ -61,7 +61,7 @@ def main (args):
 if __name__ == '__main__':  
   """
   Example call:
-  python3 main.py --data_name PUMS01 --missing_data_name MCAR_PUMS01_30percent 
+  python3 main.py --data_name PUMS01 --missing_data_name MCAR_PUMS01_30percent_alpha100 
   --num_imputations 5 --batch_size 128 --hint_rate 0.9 --alpha 100 --iterations 10000
   """
   # Inputs for the main function
