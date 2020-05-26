@@ -77,11 +77,11 @@ reference: https://arxiv.org/abs/1806.02920
 
 ```{r}
 # Load imputed dataset
-d1 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_1.csv', header = FALSE, sep = ',')
-d2 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_2.csv', header = FALSE, sep = ',')
-d3 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_3.csv', header = FALSE, sep = ',')
-d4 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_4.csv', header = FALSE, sep = ',')
-d5 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_5.csv', header = FALSE, sep = ',')
+d1 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha100_1.csv', header = FALSE, sep = ',')
+d2 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha100_2.csv', header = FALSE, sep = ',')
+d3 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha100_3.csv', header = FALSE, sep = ',')
+d4 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha100_4.csv', header = FALSE, sep = ',')
+d5 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha100_5.csv', header = FALSE, sep = ',')
 colnames(d1) = colnames(df)
 colnames(d2) = colnames(df)
 colnames(d3) = colnames(df)
