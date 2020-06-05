@@ -1,6 +1,6 @@
 
 ---
-title: "MAR 45%"
+title: "MCAR 30%"
 output:
   pdf_document: default
   html_document:
@@ -53,23 +53,23 @@ library(coda)
 * * *
 ```{r}
 # sample MCAR dataset from PUMS
-source("../../utils/sampleMAR45.R")
+source("../../utils/sampleMCAR.R")
 n = 10000
 missing_col = c(1,3,7,9,10,11)
-set.seed(3)
+missing_prob = 0.3
+set.seed(0)
 
-output_list <- sampleMAR45(n)
+output_list <- sampleMCAR(n, missing_prob)
 df <- output_list[['df']]
 df_observed <- output_list[['df_observed']]
-
-apply(is.na(df_observed), MARGIN = 2, mean)
 ```
 
 ```{r}
 # save the file as .csv
-write.table(df_observed,"./MAR_45percent.csv", row.names = FALSE, sep = ',')
-write.table(df,"./PUMS_MAR_45percent.csv", row.names = FALSE, sep = ',')
+write.table(df_observed,"./MCAR_30percent.csv", row.names = FALSE, sep = ',')
+write.table(df,"./PUMS_MCAR_30percent.csv", row.names = FALSE, sep = ',')
 ```
+
 * * *
 
 
