@@ -51,23 +51,16 @@ library(coda)
 * * *
 
 ```{r}
-# load dataset: df
-load('../../Datasets/ordinalPUMS.Rdata')
-
-# take 10,000 samples: df
-set.seed(0)
+# sample MCAR dataset from PUMS
+source("../../utils/sampleMCAR.R")
 n = 10000
-sample <- sample(nrow(df), size = 10000)
-df <- df[sample,]
-
-# create MCAR scneario with 30% chance of missing: df_observed
-missing_prob = 0.3
-df_observed <- df
 missing_col = c(1,3,7,9,10,11)
-for (col in missing_col) {
-  missing_ind <- rbernoulli(n,p = missing_prob)
-  df_observed[missing_ind, col] <- NA
-}
+missing_prob = 0.3
+set.seed(0)
+
+output_list <- sampleMCAR(n, missing_prob)
+df <- output_list[['df']]
+df_observed <- output_list[['df_observed']]
 ```
 
 

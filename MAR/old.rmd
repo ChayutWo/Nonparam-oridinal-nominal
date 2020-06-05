@@ -159,7 +159,7 @@ for (i in 1:(dim(combinations)[2])) {
 
 plot(original_dist, observed_dist, 
      xlab = 'Original joint pmf', ylab = 'Observed joint pmf', 
-     main = "Bivariate pmf", ylim = c(0,0.4), xlim = c(0,0.4))
+     main = "Bivariate pmf", ylim = c(0,0.8), xlim = c(0,0.8))
 abline(0,1, col = 'gray')
 abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
@@ -189,7 +189,7 @@ for (i in 1:(dim(combinations)[2])) {
 
 plot(original_dist, observed_dist, 
      xlab = 'Original joint pmf', ylab = 'Observed joint pmf', 
-     main = "Trivariate pmf", ylim = c(0,0.4), xlim = c(0,0.4))
+     main = "Trivariate pmf", ylim = c(0,0.5), xlim = c(0,0.5))
 abline(0,1, col = 'gray')
 abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
