@@ -34,7 +34,6 @@ ehthumbs.db
 Thumbs.db
 # Ignore data input files #
 ###########################
-Datasets/ordinalPUMS.Rdata
 Datasets/csv_pus/*
 Datasets/csv_hus/*
 Datasets/merged/*

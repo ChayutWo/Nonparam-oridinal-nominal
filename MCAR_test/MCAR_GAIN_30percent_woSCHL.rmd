@@ -1,6 +1,6 @@
 
 ---
-title: "Testing different imputation methods on PUMS (MCAR) - Generative Adversarial Imputation Nets (GAIN)"
+title: "MCAR 30% missing - Generative Adversarial Imputation Nets (GAIN)"
 output:
   pdf_document: default
   html_document:
@@ -49,18 +49,28 @@ library(coda)
 ```
 
 * * *
-
 ```{r}
-# sample MCAR dataset from PUMS
-source("../../utils/sampleMCAR.R")
+# sample MCAR dataset from PUMS, Make SCHL fully observed and MARHT missing
 n = 10000
-missing_col = c(1,3,7,9,10,11)
 missing_prob = 0.3
 set.seed(0)
 
-output_list <- sampleMCAR(n, missing_prob)
-df <- output_list[['df']]
-df_observed <- output_list[['df_observed']]
+# load dataset: df
+load('../Datasets/ordinalPUMS.Rdata')
+
+# columns to be made MCAR
+missing_col = c(1,3,6,9,10,11)
+
+# sample n rows from the full dataset
+sample <- sample(nrow(df), size = n)
+df <- df[sample,]
+
+# create MCAR scneario with missing_prob chance of missing: df_observed
+df_observed <- df
+for (col in missing_col) {
+  missing_ind <- rbernoulli(n, p = missing_prob)
+  df_observed[missing_ind, col] <- NA
+}
 ```
 
 
@@ -70,11 +80,11 @@ reference: https://arxiv.org/abs/1806.02920
 
 ```{r}
 # Load imputed dataset
-d1 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha1_1.csv', header = FALSE, sep = ',')
-d2 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha1_2.csv', header = FALSE, sep = ',')
-d3 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha1_3.csv', header = FALSE, sep = ',')
-d4 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha1_4.csv', header = FALSE, sep = ',')
-d5 = read.csv('../../GAIN/imputed_dataset/MCAR_PUMS01_30percent_alpha1_5.csv', header = FALSE, sep = ',')
+d1 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_1.csv', header = FALSE, sep = ',')
+d2 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_2.csv', header = FALSE, sep = ',')
+d3 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_3.csv', header = FALSE, sep = ',')
+d4 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_4.csv', header = FALSE, sep = ',')
+d5 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_5.csv', header = FALSE, sep = ',')
 colnames(d1) = colnames(df)
 colnames(d2) = colnames(df)
 colnames(d3) = colnames(df)

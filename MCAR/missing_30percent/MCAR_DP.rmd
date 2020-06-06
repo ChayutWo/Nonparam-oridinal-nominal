@@ -164,6 +164,13 @@ plot(1:length(alpha), alpha, xlab = 'trials',
      main = 'alpha value for the stick breaking process')
 ```
 
+```{r, echo = FALSE}
+alpha.mcmc <- mcmc(alpha, start=1)
+# auto correlation
+autocorr.plot(alpha.mcmc)
+```
+
+
 Assess bivariate joint distribution
 ```{r, echo = FALSE}
 combinations = combn(1:11, 2)
