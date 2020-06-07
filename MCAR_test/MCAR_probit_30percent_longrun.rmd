@@ -51,16 +51,14 @@ library(coda)
 * * *
 
 ```{r}
-# sample MCAR dataset from PUMS, Make SCHL fully observed and MARHT missing
 n = 3000
 missing_prob = 0.3
 set.seed(0)
 
-# load dataset: df
 load('../Datasets/ordinalPUMS.Rdata')
 
 # columns to be made MCAR
-missing_col = c(1,3,6,9,10,11)
+missing_col = c(1,3,7,9,10,11)
 
 # sample n rows from the full dataset
 sample <- sample(nrow(df), size = n)
