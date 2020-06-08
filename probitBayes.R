@@ -22,7 +22,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     marginal_prob <- table(y[!IndicatorMat[,z_index],z_index])
     marginal_prob <- marginal_prob/sum(marginal_prob)
     # create cutoff that center at 0
-    if (mod(numlevels,2)==0) {
+    if (numlevels%%2==0) {
       gamma.list[[z_index]] <- c(-10000,-as.integer(numlevels/2-1):as.integer(numlevels/2-1),10000)
     } else {
       gamma.list[[z_index]] <- c(-10000,seq(from = -(numlevels-2)/2, to=(numlevels-2)/2, by = 1 ), 10000)
@@ -144,7 +144,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     }
   }
 
-  # save current value
+  # mc_save current value
   k.mu.cur=k.mu.init
   k.sigma.cur=k.sigma.init
   L.cur=L.init
@@ -157,32 +157,35 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
   z.cur = z.init
   y.cur = y
   row.cur=0
+  N.j <- as.data.frame(table(factor(L.cur,levels=1:N)))$Freq #moved from outside the loop
   
   ####MCMC####
   
   set.seed(seed)
   for(m in 2:(Mon.true+B+1)){
     
-    # If pass burn-in and not thinned -> save
-    if(m>(B+1)&&(m-B-1)%%thin.int==0) {row.cur=row.cur+1; save=1} else {save=0}
+    cat(paste("Iteration: ", m,"\n", sep = ""))
     
-    # N.j: how many members are in each cluster
-    N.j=numeric(N)
-    for(i in 1:N)
-      N.j[i]=sum(L.cur==i)
+    # If pass burn-in and not thinned -> mc_save
+    if(m>(B+1)&&(m-B-1)%%thin.int==0) {row.cur=row.cur+1; mc_save=1} else {mc_save=0}
+    
     
     # Calculate number of occupied clusters
     nstar=sum(N.j!=0)
     
     # occupied cluster and number of members in those occupied
     L.j=sort(unique(L.cur))
-    N.j.star=N.j[which(N.j!=0)]
+    #N.j.star=N.j[N.j!=0]
     
     # indices is a matrix that store the index of samples that fall into each clusters
     # the size of indices will be (No. used clusters x max number of members)
-    Indices=matrix(0,nstar,max(N.j))
-    for(i in 1:nstar)
-      Indices[i,1:N.j.star[i]]=which(L.cur==L.j[i])
+    #Indices=matrix(0,nstar,max(N.j))
+    #for(i in 1:nstar)
+    #  Indices[i,1:N.j.star[i]]=which(L.cur==L.j[i])
+    
+    ###alternative to for loop
+    Indices <- lapply(as.matrix(1:nstar),function(x) which(L.cur==L.j[x]))
+    
     
     ## step1: sample mu and sigma for each cluster
     # r is the index for used cluster
@@ -197,21 +200,24 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
         k.mu.cur[,i]=rmvnorm(1, M.cur, V.cur)
         k.sigma.cur[,((i-1)*(d)+1):(i*(d))]=riwish(nu, S.cur)
         
-        if(save==1){
-          # save mu and sigma for empty clusters
+        if(mc_save==1){
+          # mc_save mu and sigma for empty clusters
           k.mu[((row.cur-1)*(d)+1):(row.cur*(d)),i]=k.mu.cur[,i]
           k.sigma[((row.cur-1)*(d)+1):(row.cur*(d)),((i-1)*(d)+1):(i*(d))]=k.sigma.cur[,((i-1)*(d)+1):(i*(d))] 
         }
         
       }else{
         # that cluster is occupied
-        sum.zx=rep(0,d)
-        sum.sigma.zx=matrix(0,d,d)
-        
-        for(j in 1:N.j[i]){
+        #sum.zx=rep(0,d)
+        #sum.sigma.zx=matrix(0,d,d)
+        #for(j in 1:N.j[i]){
           # sum up the response vector of all members in that cluster
-          sum.zx=sum.zx+z.cur[Indices[r,j],]
-        }
+        #  sum.zx=sum.zx+z.cur[Indices[r,j],]
+        #}
+        
+        ###alternative to for loop
+        sum.zx <- colSums(matrix(z.cur[Indices[[r]],],ncol=d))
+        
         
         # update prior parameter for mu - N(m, V)
         # updated covariance matrix = prior precision + sample precision
@@ -222,17 +228,22 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
         k.mu.cur[,i]=rmvnorm(1,b.star.mu%*%a.star.mu,b.star.mu)
         
         # calculate Stheta = sum[(zj - mu)(zj-mu)^T]
-        for(j in 1:N.j[i]){
-          diff=matrix(data=z.cur[Indices[r,j],]-k.mu.cur[,i],nrow=d,ncol=1) # dx1 vector
-          sum.sigma.zx=sum.sigma.zx+diff%*%t(diff) 
-        }
+        #for(j in 1:N.j[i]){
+        #  diff=matrix(data=z.cur[(Indices[[r]])[j],]-k.mu.cur[,i],nrow=d,ncol=1) # dx1 vector
+        #  sum.sigma.zx=sum.sigma.zx+diff%*%t(diff) 
+        #}
+        
+        ###alternative to for loop
+        sum.sigma.zx <- t(as.matrix(z.cur[Indices[[r]],] - matrix(k.mu.cur[,i],byrow=T,ncol=d,nrow=N.j[i])))%*%
+          as.matrix(z.cur[Indices[[r]],] - matrix(k.mu.cur[,i],byrow=T,ncol=d,nrow=N.j[i]))
+        
         # draw sigma for that cluster from IW distribution
         k.sigma.cur[,((i-1)*(d)+1):(i*(d))]=riwish(nu+N.j[i],S.cur+sum.sigma.zx)
         
         r=r+1 # complete this used cluster -> move to the next
         
-        if(save==1){
-          # save sampled mu and sigma for that cluster
+        if(mc_save==1){
+          # mc_save sampled mu and sigma for that cluster
           k.mu[((row.cur-1)*(d)+1):(row.cur*(d)),i]=k.mu.cur[,i]
           k.sigma[((row.cur-1)*(d)+1):(row.cur*(d)),((i-1)*(d)+1):(i*(d))]=k.sigma.cur[,((i-1)*(d)+1):(i*(d))]
         }
@@ -242,73 +253,110 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     #########################################################################
     ## step2: sample L
     
-    L.cur=numeric(n)
+    #L.cur=numeric(n)
     
     # Collect cluster mean and sigma sampled from step1 into meancov.list
-    meancov.list=vector("list",N)
-    for(j in 1:N){
-      meancov.list[[j]]=list(k.mu.cur[,j],k.sigma.cur[,((j-1)*(d)+1):(j*(d))])
-    }
-    
+    #meancov.list=vector("list",N)
+    #for(j in 1:N){
+    #  meancov.list[[j]]=list(k.mu.cur[,j],k.sigma.cur[,((j-1)*(d)+1):(j*(d))])
+    #}
     # Calculate p(Z|mu_l, Sigma_l) for each sample for each cluster = p(Z|L)
-    norm.dens.list=lapply(meancov.list, function( item ) dmvnorm (z.cur, item[[1]], item[[2]]))
-
+    #norm.dens.list=lapply(meancov.list, function(item) dmvnorm (z.cur, item[[1]], item[[2]]))
     # Turn that into a matrix of size 198x40: ij entry is p(Zi|L = j)
+    #norm.dens.mtrx=NULL
+    #for(j in 1:N){
+    #  norm.dens.mtrx=cbind(norm.dens.mtrx,as.numeric(norm.dens.list[[j]]))
+    #}
+    
+    ###rewrite everything into a single for loop
     norm.dens.mtrx=NULL
     for(j in 1:N){
-      norm.dens.mtrx=cbind(norm.dens.mtrx,as.numeric(norm.dens.list[[j]]))
+      # Calculate p(Z|mu_l, Sigma_l) for each sample for each cluster = p(Z|L)
+      k.mu.cur_j <- k.mu.cur[,j]
+      k.sigma.cur_j <- k.sigma.cur[,((j-1)*(d)+1):(j*(d))]
+      norm.dens.mtrx_j <- dmvnorm(z.cur, k.mu.cur_j, k.sigma.cur_j)
+      # Turn that into a matrix of size 198x40: ij entry is p(Zi|L = j)
+      norm.dens.mtrx <- cbind(norm.dens.mtrx,norm.dens.mtrx_j)
     }
     
     # Sample new cluster assignment from P(L|z) = P(z|L)P(L)
-    for(i in 1:n){
-      L.cur[i]=sample.int(N,size=1,prob=norm.dens.mtrx[i,]*p.probs.cur)
-    }
-    if(save==1){
-      L[row.cur,]=L.cur
-    }
+    #for(i in 1:n){
+    #  L.cur[i]=sample.int(N,size=1,prob=norm.dens.mtrx[i,]*p.probs.cur)
+    #}
+    #if(mc_save==1){
+    #  L[row.cur,]=L.cur
+    #}
+    
+    ###alternative to for loop
+    full_prob_matrix <- norm.dens.mtrx*matrix(p.probs.cur,byrow=T,ncol=N,nrow=n)
+    full_prob_matrix <- full_prob_matrix/matrix(rowSums(full_prob_matrix),nrow=n,ncol=N)
+    Ran_unif <- runif(nrow(full_prob_matrix))
+    cumul <- full_prob_matrix%*%upper.tri(diag(ncol(full_prob_matrix)),diag=TRUE)
+    L.cur <- rowSums(Ran_unif>cumul) + 1L
     
     #update components: Number of occupied clusters
     components.cur=length(unique(L.cur))
-    if(save==1)
-      components[row.cur]=components.cur
+    #if(mc_save==1)
+    #  components[row.cur]=components.cur
+    #moved to the end of mcmc
     
     #########################################################################
     ## step3: Sample p.probs
     
-    # Calculate Nj (Don't know why they don't use Nj)
-    M.config=numeric(N)
-    for(i in 1:N)
-      M.config[i]=sum(L.cur==i)
+    # Calculate Nj (Don't know why they don't use Nj) -- I've changed it!
+    #M.config=numeric(N)
+    #for(i in 1:N)
+    #  M.config[i]=sum(L.cur==i)
     
     # Update stick breaking process: Vi
-    vstar=numeric(N-1)
-    for(i in 1:(N-1)){
-      vstar[i]=rbeta(1,1+M.config[i],alpha.cur+sum(M.config[(i+1):N]))
-      if(vstar[i]==0) vstar[i]=.00001
-      if(vstar[i]==1) vstar[i]=.9999
-    }
+    #vstar=numeric(N-1)
+    #for(i in 1:(N-1)){
+    #  vstar[i]=rbeta(1,1+N.j[i],alpha.cur+sum(N.j[(i+1):N]))
+    #  if(vstar[i]==0) vstar[i]=.00001
+    #  if(vstar[i]==1) vstar[i]=.9999
+    #}
     
     # Update pi for each cluster (mixing proportion)
     # Using updated Vi and stick breaking process
-    p.probs.cur[1]=vstar[1]
-    prod=1
-    for(i in 2:(N-1)){
-      prod=prod*(1-vstar[i-1])
-      p.probs.cur[i]=vstar[i]*prod
-    }
+    #p.probs.cur[1]=vstar[1]
+    #prod=1
+    #for(i in 2:(N-1)){
+    #  prod=prod*(1-vstar[i-1])
+    #  p.probs.cur[i]=vstar[i]*prod
+    #}
+    #if((1-sum(p.probs.cur[1:(N-1)]))>=0)
+    #  p.probs.cur[N]=1-sum(p.probs.cur[1:(N-1)]) else p.probs.cur[N]=0
     
+    
+    ###rewrite step3 without any loops
+    N.j <- as.data.frame(table(factor(L.cur,levels=1:N)))$Freq
+    vstar <- rep(1,length(p.probs.cur))
+    vstar[1:(N-1)] <- rbeta((N-1),(1L+N.j[1:(N-1)]),(alpha.cur+(sum(N.j)-cumsum(N.j[-N]))))
+    if(length(which(vstar[-N]==1))>0){
+      vstar[which(vstar[-N]==1)] <- 0.99999
+    }
+    if(length(which(vstar[-N]==0))>0){
+      vstar[which(vstar[-N]==0)] <- .00001
+    }
+    one_min_vstar <- 1L-vstar
+    one_min_vstar_prod <- c(1,cumprod(one_min_vstar[1:(N-1)]))
+    p.probs.cur <- vstar*one_min_vstar_prod
     if((1-sum(p.probs.cur[1:(N-1)]))>=0)
       p.probs.cur[N]=1-sum(p.probs.cur[1:(N-1)]) else p.probs.cur[N]=0
-    if(save==1)
-      p.probs[row.cur,]=p.probs.cur
+    
+    #if(mc_save==1)
+    #  p.probs[row.cur,]=p.probs.cur
+    #moved to the end of mcmc
     
     #########################################################################
     # step4: sample alpha
     
     # sample new alpha (for stick breaking) from the posterior gamma dist
-    alpha.cur=rgamma(1,a.alpha+N-1,rate= -sum(log(1-vstar))+b.alpha)
-    if(save==1)
-      alpha[row.cur]=alpha.cur
+    #alpha.cur=rgamma(1,a.alpha+N-1,rate=b.alpha-sum(log(1-vstar[-N])))
+    alpha.cur=rgamma(1,a.alpha+N-1,rate=b.alpha-log(p.probs.cur[N]))
+    #if(mc_save==1)
+    #  alpha[row.cur]=alpha.cur
+    #moved to the end of mcmc
     
     #########################################################################
     # step5: sample M and V (parameter for DP NIW)
@@ -317,40 +365,53 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     # Update covariance matrix
     B.m.star=solve(solve(B.m)+N*solve(V.cur))
     # Update mean vector
-    sum=0
-    for(i in 1:N)
-      sum=sum+solve(V.cur)%*%k.mu.cur[,i]
+    #sum=0
+    #for(i in 1:N){
+    #  sum=sum+solve(V.cur)%*%k.mu.cur[,i]
+    #}
+    
+    ###alternative to for loop
+    sum <- as.matrix(rowSums(solve(V.cur)%*%k.mu.cur))
     
     a.m.star=B.m.star%*%(solve(B.m)%*%a.m+sum)
     
     # Sample M from full conditionally
     M.cur=rmvnorm(1,a.m.star,B.m.star)
-    if(save==1)
-      M[row.cur,]=M.cur
+    #if(mc_save==1)
+    #  M[row.cur,]=M.cur
+    #moved to the end of mcmc
     
     # sample V from IW
-    sum=matrix(0,nrow=d,ncol=d)
-    for(i in 1:N){
+    #sum=matrix(0,nrow=d,ncol=d)
+    #for(i in 1:N){
       # diff = mu-M
-      mu.diff=matrix(data=k.mu.cur[,i]-M.cur,nrow=d,ncol=1)
+    #  mu.diff=matrix(data=k.mu.cur[,i]-M.cur,nrow=d,ncol=1)
       # calculate sum(mu-M)(mu-M)^T
-      sum=sum+mu.diff%*%t(mu.diff)
-    }
+    #  sum=sum+mu.diff%*%t(mu.diff)
+    #}
+    
+    ###alternative to for loop
+    sum <- as.matrix(k.mu.cur - matrix(M.cur,nrow=d,ncol=N))%*%
+      t(as.matrix(k.mu.cur - matrix(M.cur,nrow=d,ncol=N)))
+    
     V.cur=riwish(a.V+N,B.V+sum)
     
-    if(save==1)
-      V[((row.cur-1)*(d)+1):(row.cur*(d)),]=V.cur
+    #if(mc_save==1)
+    #  V[((row.cur-1)*(d)+1):(row.cur*(d)),]=V.cur
+    #moved to the end of mcmc
     
     #########################################################################
     # step6: sample S (parameter for DP NIW)
     # The posterior of S will be Wishart
     sum.S=matrix(0,d,d)
     
-    for(i in 1:N)
+    for(i in 1:N){
       sum.S=sum.S+solve(k.sigma.cur[,((i-1)*(d)+1):(i*(d))])
+    }
     
     S.cur=rwish(a.S+nu*N,solve(solve(B.S)+sum.S))
-    if(save==1) S[((row.cur-1)*(d)+1):(row.cur*(d)),]=S.cur
+    #if(mc_save==1) S[((row.cur-1)*(d)+1):(row.cur*(d)),]=S.cur
+    #moved to the end of mcmc
     
     
     #########################################################################
@@ -361,7 +422,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
       sig=k.sigma.cur[,((L.cur[i]-1)*(d)+1):((L.cur[i])*(d))]
       # impute z1 given z2, z3 and X and other z's
       # iterate through zi
-      for (z_index in 1:R) {
+      for(z_index in 1:R){
         # mu of zi in that cluster
         mu.zi = k.mu.cur[z_index,L.cur[i]]
         # variance/covariance of different terms
@@ -376,7 +437,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
         m.z=mu.zi+sig.zx%*%solve(sig.xx)%*%diff
         s.z=sig.zz-sig.zx%*%solve(sig.xx)%*%sig.xz
         gamma_i = gamma.list[[z_index]]
-        if (IndicatorMat[i,z_index]) {
+        if(IndicatorMat[i,z_index]) {
           # The Y is missing
           # Sample zi from non truncated normal distribution and impute y value
           z.cur[i,z_index] = rnorm(1,mean=m.z,sd=sqrt(s.z))
@@ -392,13 +453,26 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
       }
     }
     # >>>>>>>>>>>>>>>> operationalized  <<<<<<<<<
-    if(save==1){
+    
+    if(mc_save==1){
+      L[row.cur,] <- L.cur
+      components[row.cur] <- components.cur
+      p.probs[row.cur,]=p.probs.cur
+      alpha[row.cur]=alpha.cur
+      M[row.cur,]=M.cur
+      V[((row.cur-1)*(d)+1):(row.cur*(d)),]=V.cur
+      S[((row.cur-1)*(d)+1):(row.cur*(d)),]=S.cur
+      
       print(c(row.cur,m,components.cur))
       for (z_index in 1:R) {
         sampled_z[row.cur,,z_index] = z.cur[,z_index]
         sampled_y[row.cur,,z_index] = y.cur[,z_index]
       }
     }
+    
+    cat(paste("Post Burn-in and thinned sample index: ", row.cur, "\n", sep = ''))
+    cat(paste("Number of Occupied Components: ", components.cur, "\n\n", sep = ''))
+    
   }
   output_list <- list(sampled_y, sampled_z)
   names(output_list) <- c('sampled_y', 'sampled_z')
