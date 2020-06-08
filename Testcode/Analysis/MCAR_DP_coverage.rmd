@@ -147,24 +147,30 @@ for (i in 1:length(imputation_index)) {
 
 Diagnostics
 
-```{r}
-d1 = imputation_list[[1]]
-d2 = imputation_list[[2]]
-d3 = imputation_list[[3]]
-d4 = imputation_list[[4]]
-d5 = imputation_list[[5]]
-imputed_sets = rbind(d1, d2, d3, d4, d5)
-```
+Coverage
 
 ```{r}
 source("../../utils/coverage.R")
-coverage_out <- coverage(imputation_list, n_way=3, missing_col)
+coverage(imputation_list, n_way=3, missing_col)
 ```
 
+RMSE
+
+```{r}
+source("../../utils/rmse.R")
+rmse(imputation_list, n_way=1, missing_col)
+```
+
+MAE
+
+```{r}
+source("../../utils/mae.R")
+mae(imputation_list, n_way=1, missing_col)
+```
 
 ```{r}
 source("../../utils/plot_hist.R")
-imputted = plot_hist(imputation_list, df_observed, n_way, missing_col)
+imputted = plot_hist(imputation_list, df_observed, missing_col)
 ```
 
 Assess convergence of MCMC

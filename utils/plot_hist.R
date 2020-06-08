@@ -1,8 +1,7 @@
-plot_hist <- function(imputation_list, df_observed, n_way, missing_col){
+plot_hist <- function(imputation_list, df_observed, missing_col){
   # Plot histogram comparing orignal, observed and imputed pmf
   # imputation_list: a list containing multiple imputation df
   # df_observed: dataframe with missing values
-  # n_way: the number of way the contingency table should consider (1 for univariate pmf, 2 for bivariate, etc)
   # missing_col: The column subjected to missing values
   
   # return: NULL

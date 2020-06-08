@@ -53,7 +53,7 @@ library(coda)
 ```{r}
 # sample MCAR dataset from PUMS
 source("../../utils/sampleMCAR.R")
-n = 3000
+n = 10000
 missing_col = c(1,3,7,9,10,11)
 missing_prob = 0.3
 set.seed(0)
@@ -67,7 +67,7 @@ df_observed <- output_list[['df_observed']]
 ### Ordinal bayesian nonparametric model
 
 ```{r, echo = TRUE, results='hide'}
-source("../../probitBayes.R")
+source("../../probitBayes_optimized.R")
 N = 40
 Mon = 300
 B = 300
