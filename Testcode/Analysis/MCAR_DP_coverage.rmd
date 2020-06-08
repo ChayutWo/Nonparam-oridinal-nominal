@@ -1,6 +1,6 @@
 
 ---
-title: "MAR 45% missing - DPMPM"
+title: "MCAR 30% missing - DPMPM"
 output:
   pdf_document: default
   html_document:
@@ -54,16 +54,15 @@ library(NPBayesImputeCat)
 * * *
 ```{r}
 # sample MCAR dataset from PUMS
-source("../../utils/sampleMAR45.R")
+source("../../utils/sampleMCAR.R")
 n = 10000
 missing_col = c(1,3,7,9,10,11)
-set.seed(3)
+missing_prob = 0.3
+set.seed(0)
 
-output_list <- sampleMAR45(n)
+output_list <- sampleMCAR(n, missing_prob)
 df <- output_list[['df']]
 df_observed <- output_list[['df_observed']]
-
-apply(is.na(df_observed), MARGIN = 2, mean)
 ```
 
 
@@ -131,7 +130,8 @@ ImputedX <- GetDataFrame(result$ImputedX,df)
 imputation_index = as.integer(seq(1,dim(imputed_df)[1], length.out = 5))
 imputation_list = list()
 levels = c(7,7,7,19,5,4,7,2,17,3,13)
-for (index in imputation_index) {
+for (i in 1:length(imputation_index)) {
+  index = imputation_index[i]
   # need to plus 1 here because the class index of DP function starts at 0
   d = imputed_df[index,] + 1
   dim(d) = dim(t(df_observed))
@@ -141,7 +141,7 @@ for (index in imputation_index) {
   for (col_index in 1:ncol(df_observed)) {
     d[,col_index] = factor(d[,col_index], levels = 1:levels[col_index], ordered = TRUE)
   }
-  imputation_list[[index]] = d
+  imputation_list[[i]] = d
 }
 ```
 
@@ -156,28 +156,18 @@ d5 = imputation_list[[5]]
 imputed_sets = rbind(d1, d2, d3, d4, d5)
 ```
 
-```{r, echo = FALSE}
-for (var_index in missing_col) {
-  y_original = df[,var_index]
-  original_pmf = table(y_original)/length(y_original)
-  
-  # Observed distribution
-  missing_indicator = is.na(df_observed)[,var_index]
-  y_observed = y_original[!missing_indicator]
-  observed_pmf = table(y_observed)/length(y_observed)
-  
-  # Extract variable from imputed data
-  imputed_pmf = table(imputed_sets[, var_index])/length(imputed_sets[, var_index])
-  
-  results = rbind(original_pmf,observed_pmf,imputed_pmf)
-  colnames(results)<- 1:dim(imputed_pmf)
-  barplot(results, xlab = 'Category', beside = TRUE, 
-          legend = TRUE, 
-          main = paste('DP:', colnames(df)[var_index]))
-}
+```{r}
+source("../../utils/coverage.R")
+coverage_out <- coverage(imputation_list, n_way=3, missing_col)
 ```
 
 
+```{r}
+source("../../utils/plot_hist.R")
+imputted = plot_hist(imputation_list, df_observed, n_way, missing_col)
+```
+
+Assess convergence of MCMC
 ```{r, echo = FALSE}
 # The number of clusters/latent groups used
 plot(1:length(k_star), k_star, xlab = 'trials', 
@@ -199,59 +189,12 @@ autocorr.plot(alpha.mcmc)
 ```
 
 
-Assess bivariate joint distribution
-```{r, echo = FALSE}
-combinations = combn(1:11, 2)
-original_dist = c()
-imputed_dist = c()
-for (i in 1:(dim(combinations)[2])) {
-  variables = combinations[, i]
-  # Compute the joint pmf in the original dataframe without missing values
-  original_pmf = table(df[,variables])
-  original_pmf = original_pmf/sum(original_pmf)
-      
-  # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(imputed_sets[,variables])
-  imputed_pmf = imputed_pmf/sum(imputed_pmf)
-  
-  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
-  imputed_dist = rbind(imputed_dist, matrix(imputed_pmf, ncol = 1))
-}
+Assess joint distribution
 
-plot(original_dist, imputed_dist, 
-     xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
-     main = "Bivariate pmf")
-abline(0,1, col = 'gray')
-abline(0,1.1, col = 'red')
-abline(0, 0.9, col = 'red')
-```
-
-
-Assess trivariate joint distribution
-```{r, echo = FALSE}
-combinations = combn(1:11, 3)
-original_dist = c()
-imputed_dist = c()
-for (i in 1:(dim(combinations)[2])) {
-  variables = combinations[, i]
-  # Compute the joint pmf in the original dataframe without missing values
-  original_pmf = table(df[,variables])
-  original_pmf = original_pmf/sum(original_pmf)
-      
-  # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(imputed_sets[,variables])
-  imputed_pmf = imputed_pmf/sum(imputed_pmf)
-  
-  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
-  imputed_dist = rbind(imputed_dist, matrix(imputed_pmf, ncol = 1))
-}
-
-plot(original_dist, imputed_dist, 
-     xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
-     main = 'Trivariate pmf')
-abline(0,1, col = 'gray')
-abline(0,1.1, col = 'red')
-abline(0, 0.9, col = 'red')
+```{r}
+source("../../utils/plot_pmf.R")
+imputted = plot_pmf(imputation_list, n_way=2, missing_col)
+imputted = plot_pmf(imputation_list, n_way=3, missing_col)
 ```
 
 * * *

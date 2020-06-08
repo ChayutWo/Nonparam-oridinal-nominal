@@ -126,7 +126,35 @@ result <- model$snapshot
 ImputedX <- GetDataFrame(result$ImputedX,df)
 ```
 
+```{r}
+# extract 5 imputed dataset from DP model
+imputation_index = as.integer(seq(1,dim(imputed_df)[1], length.out = 5))
+imputation_list = list()
+levels = c(7,7,7,19,5,4,7,2,17,3,13)
+for (index in imputation_index) {
+  # need to plus 1 here because the class index of DP function starts at 0
+  d = imputed_df[index,] + 1
+  dim(d) = dim(t(df_observed))
+  d = data.frame(t(d))
+  colnames(d) = colnames(df_observed)
+  # format columns of d
+  for (col_index in 1:ncol(df_observed)) {
+    d[,col_index] = factor(d[,col_index], levels = 1:levels[col_index], ordered = TRUE)
+  }
+  imputation_list[[index]] = d
+}
+```
+
 Diagnostics
+
+```{r}
+d1 = imputation_list[[1]]
+d2 = imputation_list[[2]]
+d3 = imputation_list[[3]]
+d4 = imputation_list[[4]]
+d5 = imputation_list[[5]]
+imputed_sets = rbind(d1, d2, d3, d4, d5)
+```
 
 ```{r, echo = FALSE}
 for (var_index in missing_col) {
@@ -139,14 +167,13 @@ for (var_index in missing_col) {
   observed_pmf = table(y_observed)/length(y_observed)
   
   # Extract variable from imputed data
-  imputed_pmf = table(imputed_df[,seq(var_index, dim(imputed_df)[2], dim(df)[2])])
-  imputed_pmf = imputed_pmf/sum(imputed_pmf)
+  imputed_pmf = table(imputed_sets[, var_index])/length(imputed_sets[, var_index])
   
   results = rbind(original_pmf,observed_pmf,imputed_pmf)
   colnames(results)<- 1:dim(imputed_pmf)
   barplot(results, xlab = 'Category', beside = TRUE, 
           legend = TRUE, 
-          main = paste('Blocked Gibbs Sampling Assessment:', colnames(df)[var_index]))
+          main = paste('DP:', colnames(df)[var_index]))
 }
 ```
 
@@ -171,12 +198,12 @@ alpha.mcmc <- mcmc(alpha, start=1)
 autocorr.plot(alpha.mcmc)
 ```
 
+
 Assess bivariate joint distribution
 ```{r, echo = FALSE}
 combinations = combn(1:11, 2)
 original_dist = c()
 imputed_dist = c()
-levels = c(7,7,7,19,5,4,7,2,17,3,13)
 for (i in 1:(dim(combinations)[2])) {
   variables = combinations[, i]
   # Compute the joint pmf in the original dataframe without missing values
@@ -184,13 +211,7 @@ for (i in 1:(dim(combinations)[2])) {
   original_pmf = original_pmf/sum(original_pmf)
       
   # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(factor(imputed_df[,seq(variables[1], 
-                                                dim(imputed_df)[2], dim(df)[2])], 
-                                levels = 0:(levels[variables[1]]-1)),
-                      factor(imputed_df[,seq(variables[2], 
-                                                dim(imputed_df)[2], dim(df)[2])] ,
-                                levels = 0:(levels[variables[2]]-1)))
-                      
+  imputed_pmf = table(imputed_sets[,variables])
   imputed_pmf = imputed_pmf/sum(imputed_pmf)
   
   original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
@@ -205,12 +226,12 @@ abline(0,1.1, col = 'red')
 abline(0, 0.9, col = 'red')
 ```
 
+
 Assess trivariate joint distribution
 ```{r, echo = FALSE}
 combinations = combn(1:11, 3)
 original_dist = c()
 imputed_dist = c()
-levels = c(7,7,7,19,5,4,7,2,17,3,13)
 for (i in 1:(dim(combinations)[2])) {
   variables = combinations[, i]
   # Compute the joint pmf in the original dataframe without missing values
@@ -218,16 +239,7 @@ for (i in 1:(dim(combinations)[2])) {
   original_pmf = original_pmf/sum(original_pmf)
       
   # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(factor(imputed_df[,seq(variables[1], 
-                                                dim(imputed_df)[2], dim(df)[2])], 
-                                levels = 0:(levels[variables[1]]-1)),
-                      factor(imputed_df[,seq(variables[2], 
-                                                dim(imputed_df)[2], dim(df)[2])] ,
-                                levels = 0:(levels[variables[2]]-1)),
-                      factor(imputed_df[,seq(variables[3], 
-                                                dim(imputed_df)[2], dim(df)[2])] ,
-                                levels = 0:(levels[variables[3]]-1)))
-                      
+  imputed_pmf = table(imputed_sets[,variables])
   imputed_pmf = imputed_pmf/sum(imputed_pmf)
   
   original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
