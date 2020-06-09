@@ -69,11 +69,13 @@ df_observed <- output_list[['df_observed']]
 ```{r, echo = TRUE, results='hide'}
 source("../../probitBayes_optimized.R")
 N = 40
-Mon = 300
-B = 300
+Mon = 20
+B = 1
 thin.int = 1
+start = Sys.time()
 # function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, seed = 0)
 output_list <- probitBayesImputation(df_observed, N, Mon, B, thin.int)
+Sys.time() - start
 ```
 
 ```{r}
