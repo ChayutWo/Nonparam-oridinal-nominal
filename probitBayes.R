@@ -463,14 +463,14 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
       V[((row.cur-1)*(d)+1):(row.cur*(d)),]=V.cur
       S[((row.cur-1)*(d)+1):(row.cur*(d)),]=S.cur
       
-      print(c(row.cur,m,components.cur))
+      #print(c(row.cur,m,components.cur))
+      cat(paste("Post Burn-in and thinned sample index: ", row.cur, "\n", sep = ''))
       for (z_index in 1:R) {
         sampled_z[row.cur,,z_index] = z.cur[,z_index]
         sampled_y[row.cur,,z_index] = y.cur[,z_index]
       }
     }
     
-    cat(paste("Post Burn-in and thinned sample index: ", row.cur, "\n", sep = ''))
     cat(paste("Number of Occupied Components: ", components.cur, "\n\n", sep = ''))
     
   }
