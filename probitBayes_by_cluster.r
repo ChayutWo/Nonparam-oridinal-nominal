@@ -1,4 +1,4 @@
-probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, seed = 0){
+probitBayesImputation <- function(y, N = 40, Mon = 1000, B = 5000, thin.int = 5, seed = 0){
   # Perform nonparametric Bayesian ordinal model for missing data imputation
   # y: dataframe containing NA
   # N: maximum number of clusters used in Dirichlet process
@@ -117,8 +117,10 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     k.sigma.init[var_ind,]=(R.z[var_ind]/6)^2*k.sigma.init[var_ind,]/2
   }
   
-  # everyone is in the same cluster
-  L.init=rep(1,n) 
+  
+  #L.init=rep(1,n) # everyone is in the same cluster
+  L.init <- sample(1:(N/3),n,replace=T) #randomly assign people to one-third of the clusters
+  #L.init <- sample(1:N,n,replace=T) #randomly assign people to all the clusters
   
   # equal probability for each cluster
   p.probs.init=rep(1/N,N)
@@ -166,7 +168,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
   z.cur = z.init
   y.cur = y
   row.cur=0
-  N.j <- as.data.frame(table(factor(L.cur,levels=1:N)))$Freq #moved from outside the loop
+  N.j <- as.data.frame(table(factor(L.cur,levels=1:N)))$Freq #moved from inside the loop
   
   ####MCMC####
   
@@ -278,6 +280,14 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     #  norm.dens.mtrx=cbind(norm.dens.mtrx,as.numeric(norm.dens.list[[j]]))
     #}
     
+    # Sample new cluster assignment from P(L|z) = P(z|L)P(L)
+    #for(i in 1:n){
+    #  L.cur[i]=sample.int(N,size=1,prob=norm.dens.mtrx[i,]*p.probs.cur)
+    #}
+    #if(mc_save==1){
+    #  L[row.cur,]=L.cur
+    #}
+    
     ###rewrite everything into a single for loop
     start = Sys.time()
     norm.dens.mtrx=NULL
@@ -289,15 +299,6 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
       # Turn that into a matrix of size 198x40: ij entry is p(Zi|L = j)
       norm.dens.mtrx <- cbind(norm.dens.mtrx,norm.dens.mtrx_j)
     }
-    
-    # Sample new cluster assignment from P(L|z) = P(z|L)P(L)
-    #for(i in 1:n){
-    #  L.cur[i]=sample.int(N,size=1,prob=norm.dens.mtrx[i,]*p.probs.cur)
-    #}
-    #if(mc_save==1){
-    #  L[row.cur,]=L.cur
-    #}
-    
     ###alternative to for loop
     full_prob_matrix <- norm.dens.mtrx*matrix(p.probs.cur,byrow=T,ncol=N,nrow=n)
     full_prob_matrix <- full_prob_matrix/matrix(rowSums(full_prob_matrix),nrow=n,ncol=N)
@@ -365,9 +366,8 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     # step4: sample alpha
     
     # sample new alpha (for stick breaking) from the posterior gamma dist
-    #alpha.cur=rgamma(1,a.alpha+N-1,rate=b.alpha-sum(log(1-vstar[-N])))
     start = Sys.time()
-    alpha.cur=rgamma(1,a.alpha+N-1,rate=b.alpha-log(p.probs.cur[N]))
+    alpha.cur=rgamma(1,a.alpha+N-1,rate=b.alpha-sum(log(1-vstar[-N])))
     #if(mc_save==1)
     #  alpha[row.cur]=alpha.cur
     #moved to the end of mcmc
@@ -437,7 +437,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     # Loop over active cluster
     for (cluster_id in unique(L.cur)) {
       # get covariance matrix for that cluster
-      sig=k.sigma.cur[,((cluster_id-1)*(d)+1):((cluster_id)*(d))]
+      sig <- k.sigma.cur[,((cluster_id-1)*(d)+1):((cluster_id)*(d))]
       
       # Loop over variables z
       for (z_index in 1:R) {
@@ -445,36 +445,68 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
         mu.zi = k.mu.cur[z_index,cluster_id]
         mu.xi = k.mu.cur[-z_index,cluster_id]
         # variance/covariance of different terms
-        sig.zx=matrix(data=sig[z_index,-z_index],nrow=1,ncol=d-1)
-        sig.xz=t(sig.zx)
-        sig.xx=matrix(data=sig[-z_index,-z_index],nrow=d-1,ncol=d-1)
-        sig.zz=sig[z_index,z_index]
+        sig.zx = matrix(data=sig[z_index,-z_index],nrow=1,ncol=d-1)
+        sig.xz = t(sig.zx)
+        sig.xx = matrix(data=sig[-z_index,-z_index],nrow=d-1,ncol=d-1)
+        sig.zz = sig[z_index,z_index]
         # calculate conditional variance of z|x: s.z
         sig.zx_inv_sig.xx = sig.zx%*%solve(sig.xx)
         s.z=sig.zz-sig.zx_inv_sig.xx%*%sig.xz
+        
+        
         # get boundary for variable z: gamma_i
-        gamma_i = gamma.list[[z_index]]
+        #gamma_i = gamma.list[[z_index]]
         
         # Loop over observations in that cluster
-        for (i in (1:n)[L.cur == cluster_id]) {
+        #for (i in (1:n)[L.cur == cluster_id]) {
           # xi - mu.xi: diff
-          diff=matrix(data=z.cur[i,-z_index]-mu.xi,nrow=d-1,ncol=1)
+        #  diff=matrix(data=z.cur[i,-z_index]-mu.xi,nrow=d-1,ncol=1)
           # calculate conditional mean: m.z
-          m.z=mu.zi+sig.zx_inv_sig.xx%*%diff
+        #  m.z=mu.zi+sig.zx_inv_sig.xx%*%diff
           # if missing, sample from untruncated normal. Else, sample from truncated normal
-          if(IndicatorMat[i,z_index]) {
+        #  if(IndicatorMat[i,z_index]) {
             # The Y is missing
             # Sample zi from non truncated normal distribution and impute y value
-            z.cur[i,z_index] = rnorm(1,mean=m.z,sd=sqrt(s.z))
-            y.cur[i,z_index] = sum(z.cur[i,z_index]>gamma_i)
-            # Set y according to gamma_i
-          }else{
+        #    z.cur[i,z_index] = rnorm(1,mean=m.z,sd=sqrt(s.z))
+        #    y.cur[i,z_index] = sum(z.cur[i,z_index]>gamma_i)
+        #    # Set y according to gamma_i
+        #  }else{
             # Sample zi from truncated normal considering yi
-            z.cur[i,z_index]=rtruncnorm(1,a=gamma_i[y[i,z_index]],
-                                        b=gamma_i[y[i,z_index]+1],
-                                        mean=m.z,sd=sqrt(s.z))
-          }
+        #    z.cur[i,z_index]=rtruncnorm(1,a=gamma_i[y[i,z_index]],
+        #                                b=gamma_i[y[i,z_index]+1],
+        #                                mean=m.z,sd=sqrt(s.z))
+        #  }
+        #}
+        
+        # Block sampling
+        all_index_cluster_id <- which(L.cur == cluster_id)
+        z.cur_cluster_id_min_z_index <- matrix(z.cur[all_index_cluster_id,-z_index],ncol=length(mu.xi))
+        diff_cluster_id <- z.cur_cluster_id_min_z_index - 
+          matrix(mu.xi,nrow=nrow(z.cur_cluster_id_min_z_index),ncol=length(mu.xi),byrow=T)
+        m.z <- mu.zi + diff_cluster_id%*%t(sig.zx_inv_sig.xx)
+        
+        # Sample all z_i and y for observations with missing entries
+        gamma_z_index <- gamma.list[[z_index]]
+        miss_index_cluster_id <- all_index_cluster_id[IndicatorMat[all_index_cluster_id,z_index]]
+        if(length(miss_index_cluster_id) > 0){
+          z.cur[miss_index_cluster_id,z_index] <- 
+            rnorm(length(miss_index_cluster_id),mean=m.z[IndicatorMat[all_index_cluster_id,z_index]],sd=sqrt(s.z))
+          y.cur[miss_index_cluster_id,z_index] <- 
+            apply(as.matrix(z.cur[miss_index_cluster_id,z_index]),1,function(x) sum(x > gamma_z_index))
         }
+        
+        # Sample all z_i for observations with no missing entries
+        obs_index_cluster_id <- all_index_cluster_id[!IndicatorMat[all_index_cluster_id,z_index]]
+        if(length(obs_index_cluster_id) > 0){
+          z.cur[obs_index_cluster_id,z_index] <- 
+            rtruncnorm(length(obs_index_cluster_id),
+                       a=gamma_z_index[y.cur[obs_index_cluster_id,z_index]],
+                       b=gamma_z_index[y.cur[obs_index_cluster_id,z_index]+1],
+                       mean=m.z[!IndicatorMat[all_index_cluster_id,z_index]],
+                       sd=sqrt(s.z))
+        }
+        
+        
       }
     }
     z_time = c(z_time, Sys.time() - start)
@@ -489,7 +521,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
       V[((row.cur-1)*(d)+1):(row.cur*(d)),]=V.cur
       S[((row.cur-1)*(d)+1):(row.cur*(d)),]=S.cur
       
-      print(c(row.cur,m,components.cur))
+      #print(c(row.cur,m,components.cur))
       for (z_index in 1:R) {
         sampled_z[row.cur,,z_index] = z.cur[,z_index]
         sampled_y[row.cur,,z_index] = y.cur[,z_index]
@@ -497,7 +529,11 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
     }
     saving_time = c(saving_time, Sys.time() - start)
     cat(paste("Post Burn-in and thinned sample index: ", row.cur, "\n", sep = ''))
-    cat(paste("Number of Occupied Components: ", components.cur, "\n\n", sep = ''))
+    cat(paste("Number of Occupied Components: ", components.cur, "\n", sep = ''))
+    cat(paste("Alpha: ", alpha.cur, "\n", sep = ''))
+    cat(paste("Observations in all Components: ",
+              paste(N.j,collapse = "_|||_"), "\n\n", sep = ''))
+    
     
   }
   total_time = mean(mu_time)+mean(L_time)+mean(pprobs_time)+mean(alpha_time)+mean(MV_time)+
@@ -511,7 +547,7 @@ probitBayesImputation <- function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, 
   cat(paste("average z sample time ", round(mean(z_time),3), "\n"))
   cat(paste("average saving sample time ", round(mean(saving_time),3), "\n"))
   cat(paste("total time per iteration ", round(total_time,3), "\n"))
-  output_list <- list(sampled_y, sampled_z)
-  names(output_list) <- c('sampled_y', 'sampled_z')
+  output_list <- list(sampled_y, sampled_z,p.probs,alpha,M)
+  names(output_list) <- c('sampled_y', 'sampled_z','p.probs','alpha','M')
   return(output_list)
 }
