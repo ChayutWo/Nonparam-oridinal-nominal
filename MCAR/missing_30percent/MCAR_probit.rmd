@@ -52,103 +52,32 @@ library(coda)
 
 ```{r}
 # sample MCAR dataset from PUMS
-source("../../utils/sampleMCAR.R")
+source("../../utils/sample_PUMS.R")
+source("../../utils/make_MCAR.R")
 n = 10000
 missing_col = c(1,3,7,9,10,11)
 missing_prob = 0.3
 set.seed(0)
 
-output_list <- sampleMCAR(n, missing_prob)
-df <- output_list[['df']]
-df_observed <- output_list[['df_observed']]
+df <- sample_PUMS(n)
+df_observed <- make_MCAR(df, missing_prob)
 ```
 
 
 ### Ordinal bayesian nonparametric model
 
 ```{r, echo = TRUE, results='hide'}
-source("../../probitBayes_by_cluster.R")
-N = 40
-Mon = 1000
-B = 1500
-thin.int = 2
-start = Sys.time()
-# function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, seed = 0)
-output_list <- probitBayesImputation(df_observed, N, Mon, B, thin.int)
-Sys.time() - start
-```
-
-```{r}
-sampled_y <- output_list[['sampled_y']]
-sampled_z <- output_list[['sampled_z']]
-
-# extract 5 imputed dataset from probit model
-imputation_index = as.integer(seq(1,dim(sampled_y)[1], length.out = 5))
-imputation_list = list()
-
-levels = c(7,7,7,19,5,4,7,2,17,3,13)
-for (i in 1:length(imputation_index)) {
-  index = imputation_index[i]
-  # need to plus 1 here because the class index of DP function starts at 0
-  d = sampled_y[index,,]
-  d = data.frame(d)
-  colnames(d) = colnames(df_observed)
-  # format columns of d
-  for (col_index in 1:ncol(df_observed)) {
-    d[,col_index] = factor(d[,col_index], levels = 1:levels[col_index], ordered = TRUE)
-  }
-  imputation_list[[i]] = d
-}
+source('../../utils/models/PROBIT_imputation.R')
+imputation_list = PROBIT_imputation(df_observed, 5)
 ```
 
 Diagnostics
 
-Coverage
-
 ```{r}
-source("../../utils/coverage.R")
-coverage(imputation_list, n_way=2, missing_col)
+source("../../utils/create_report.R")
+create_report(imputation_list, max_nway=4, missing_col, df_observed)
 ```
 
-RMSE
-
-```{r}
-source("../../utils/rmse.R")
-rmse(imputation_list, n_way=1, missing_col)
-```
-
-MAE
-
-```{r}
-source("../../utils/mae.R")
-mae(imputation_list, n_way=1, missing_col)
-```
-
-```{r}
-source("../../utils/plot_hist.R")
-imputted = plot_hist(imputation_list, df_observed, missing_col)
-```
-
-Assess convergence of MCMC
-```{r, echo = FALSE}
-# trace plot
-z.mcmc <- mcmc(sampled_z[,1,11], start=1)
-plot(z.mcmc)
-```
-
-```{r, echo = FALSE}
-# auto correlation
-autocorr.plot(z.mcmc)
-```
-
-
-Assess joint distribution
-
-```{r}
-source("../../utils/plot_pmf.R")
-imputted = plot_pmf(imputation_list, n_way=2, missing_col)
-imputted = plot_pmf(imputation_list, n_way=3, missing_col)
-```
 
 * * *
 

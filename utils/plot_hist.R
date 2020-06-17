@@ -36,5 +36,4 @@ plot_hist <- function(imputation_list, df_observed, missing_col){
             legend = TRUE, 
             main = colnames(df)[var_index])
   }
-  return(imputed_pmf)
 }

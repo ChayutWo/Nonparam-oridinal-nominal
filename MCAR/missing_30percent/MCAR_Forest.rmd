@@ -68,120 +68,23 @@ df_observed <- output_list[['df_observed']]
 
 ### missForest
 
-```{r, echo = TRUE, results='hide'}
-df.imp <- missForest(df_observed, verbose = FALSE)
-d1 <-  df.imp$ximp
-df.imp <- missForest(df_observed, verbose = FALSE)
-d2 <-  df.imp$ximp
-df.imp <- missForest(df_observed, verbose = FALSE)
-d3 <-  df.imp$ximp
-df.imp <- missForest(df_observed, verbose = FALSE)
-d4 <-  df.imp$ximp
-df.imp <- missForest(df_observed, verbose = FALSE)
-d5 <-  df.imp$ximp
-imputed_sets = rbind(d1, d2, d3, d4, d5)
+```{r}
+# Perform missing data imputation and format output into list
+imputation_list = list()
+for (i in 1:5) {
+  df.imp <- missForest(df_observed, verbose = FALSE)
+  imputation_list[[i]] = df.imp$ximp
+}
 ```
 
 
 Diagnostics
 
-```{r, echo = FALSE}
-for (var_index in missing_col) {
-  y_original = df[,var_index]
-  original_pmf = table(y_original)/length(y_original)
-  
-  # Observed distribution
-  missing_indicator = is.na(df_observed)[,var_index]
-  y_observed = y_original[!missing_indicator]
-  observed_pmf = table(y_observed)/length(y_observed)
-  
-  # Extract variable from imputed data
-  sample_estimate1 = table(d1[,var_index])/length(d1[,var_index])
-  sample_estimate2 = table(d2[,var_index])/length(d2[,var_index])
-  sample_estimate3 = table(d3[,var_index])/length(d3[,var_index])
-  sample_estimate4 = table(d4[,var_index])/length(d4[,var_index])
-  sample_estimate5 = table(d5[,var_index])/length(d5[,var_index])
-  
-  imputed_pmf = (sample_estimate1 + sample_estimate2 + sample_estimate3 +
-                   sample_estimate4 + sample_estimate5)/5
-  
-  results = rbind(original_pmf,observed_pmf,imputed_pmf)
-  colnames(results)<- 1:dim(imputed_pmf)
-  barplot(results, xlab = 'Category', beside = TRUE, 
-          legend = TRUE, 
-          main = paste('MICE:', colnames(df)[var_index]))
-}
+```{r}
+source("../../utils/create_report.R")
+create_report(imputation_list, max_nway=4, missing_col, df_observed)
 ```
 
-
-Assess bivariate joint distribution
-```{r, echo = FALSE}
-combinations = combn(1:11, 2)
-original_dist = c()
-imputed_dist = c()
-for (i in 1:(dim(combinations)[2])) {
-  variables = combinations[, i]
-  # Compute the joint pmf in the original dataframe without missing values
-  original_pmf = table(df[,variables])
-  original_pmf = original_pmf/sum(original_pmf)
-      
-  # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(imputed_sets[,variables])
-  imputed_pmf = imputed_pmf/sum(imputed_pmf)
-  
-  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
-  imputed_dist = rbind(imputed_dist, matrix(imputed_pmf, ncol = 1))
-}
-
-plot(original_dist, imputed_dist, 
-     xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
-     main = 'Bivariate pmf')
-abline(0,1, col = 'gray')
-abline(0,1.1, col = 'red')
-abline(0, 0.9, col = 'red')
-```
-
-
-Assess trivariate joint distribution
-```{r, echo = FALSE}
-combinations = combn(1:11, 3)
-original_dist = c()
-imputed_dist = c()
-for (i in 1:(dim(combinations)[2])) {
-  variables = combinations[, i]
-  # Compute the joint pmf in the original dataframe without missing values
-  original_pmf = table(df[,variables])
-  original_pmf = original_pmf/sum(original_pmf)
-      
-  # Compute the joint pmf in the imputed dataset and average over imputations
-  imputed_pmf = table(imputed_sets[,variables])
-  imputed_pmf = imputed_pmf/sum(imputed_pmf)
-  
-  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
-  imputed_dist = rbind(imputed_dist, matrix(imputed_pmf, ncol = 1))
-}
-
-plot(original_dist, imputed_dist, 
-     xlab = 'Original joint pmf', ylab = 'Imputed joint pmf', 
-     main = 'Trivariate pmf')
-abline(0,1, col = 'gray')
-abline(0,1.1, col = 'red')
-abline(0, 0.9, col = 'red')
-```
-
-```{r, echo = FALSE}
-# calculate rmse
-numeric_df = sapply(df, as.numeric)
-normalized_df = t(t(numeric_df-1)/(apply(numeric_df, MARGIN = 2, FUN = max)-1))
-numeric_impute = sapply(d1, as.numeric)
-normalized_impute = t(t(numeric_impute-1)/(apply(numeric_df, MARGIN = 2, FUN = max)-1))
-
-missing_matrix = is.na(df_observed)
-
-rmse = sqrt(sum((normalized_df[missing_matrix] - normalized_impute[missing_matrix])^2)/sum(missing_matrix))
-print('rmse')
-rmse
-```
 
 * * *
 

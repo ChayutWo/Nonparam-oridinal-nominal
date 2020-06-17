@@ -1,0 +1,131 @@
+
+---
+title: "MCAR 30% missing - MICE-CART"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+library(coda)
+library(mice)
+```
+
+* * *
+
+```{r}
+set.seed(0)
+source("../../utils/sample_PUMS.R")
+source("../../utils/make_MCAR.R")
+source("../../utils/make_MAR_30.R")
+source("../../utils/make_MAR_45.R")
+
+# Specify parameters of the dataset and missing data mechanism
+n <- 10000
+missing_col <- c(1,3,7,9,10,11)
+set.seed(0)
+
+# Root for different dataset
+root_fully_observed <- '../../Datasets/fully_observed/fully_observed_'
+root_MCAR_30 <- '../../Datasets/MCAR_30/MCAR_30_'
+root_MCAR_45 <- '../../Datasets/MCAR_45/MCAR_45_'
+root_MAR_30 <- '../../Datasets/MAR_30/MAR_30_'
+root_MAR_45 <- '../../Datasets/MAR_45/MAR_45_'
+
+for (i in 1:2) {
+  # Generate a full set of fully observed and missing dataframes
+  df <- sample_PUMS(n)
+  df_MCAR_30 <- make_MCAR(df, 0.3)
+  df_MCAR_45 <- make_MCAR(df, 0.45)
+  df_MAR_30 <- make_MAR_30(df)
+  df_MAR_45 <- make_MAR_45(df)
+  
+  # Obtain a full path for the file to be saved
+  name_fully_observed <- paste(root_fully_observed, i,'.csv', sep = '')
+  name_MCAR_30 <- paste(root_MCAR_30, i,'.csv', sep = '')
+  name_MCAR_45 <- paste(root_MCAR_45, i,'.csv', sep = '')
+  name_MAR_30 <- paste(root_MAR_30, i,'.csv', sep = '')
+  name_MAR_45 <- paste(root_MAR_45, i,'.csv', sep = '')
+  
+  # Save them according to the name and file structure
+  write.table(df, name_fully_observed, row.names = FALSE, sep = ',')
+  write.table(df_MCAR_30, name_MCAR_30, row.names = FALSE, sep = ',')
+  write.table(df_MCAR_45, name_MCAR_45, row.names = FALSE, sep = ',')
+  write.table(df_MAR_30, name_MAR_30, row.names = FALSE, sep = ',')
+  write.table(df_MAR_45, name_MAR_45, row.names = FALSE, sep = ',')
+}
+```
+
+```{r}
+MCAR_30 <- read_csv(name_MCAR_30)
+MCAR_45 <- read_csv(name_MCAR_45)
+MAR_30 <- read_csv(name_MAR_30)
+MAR_45 <- read_csv(name_MAR_45)
+```
+
+```{r}
+apply(is.na(df_MCAR_30), MARGIN = 2, mean)
+apply(is.na(df_MCAR_45), MARGIN = 2, mean)
+apply(is.na(df_MAR_30), MARGIN = 2, mean)
+apply(is.na(df_MAR_45), MARGIN = 2, mean)
+
+```
+
+```{r}
+apply(is.na(MCAR_30), MARGIN = 2, mean)
+apply(is.na(MCAR_45), MARGIN = 2, mean)
+apply(is.na(MAR_30), MARGIN = 2, mean)
+apply(is.na(MAR_45), MARGIN = 2, mean)
+```
+
+```{r}
+filename = 'MCAR_30/MCAR_30_2'
+source('../../utils/load_data.R')
+d <- load_data(filename)
+apply(is.na(d), MARGIN = 2, mean)
+```
+
+* * *
+
+
+
