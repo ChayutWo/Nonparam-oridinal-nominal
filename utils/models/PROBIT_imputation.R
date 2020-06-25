@@ -7,12 +7,12 @@ PROBIT_imputation <- function(df_observed, n_imputations){
   # a list comprising of imputed datasets
   
   # Import imputation function
-  source("../../probitBayes_by_cluster.R")
+  source("../../utils/models/probitBayes_by_cluster.R")
   # MCMC parameter
-  N = 40
-  Mon = 3000
-  B = 2000
-  thin.int = 5
+  N = 50
+  Mon = 1000
+  B = 5000
+  thin.int = 10
   
   # function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, seed = 0)
   output_list <- probitBayesImputation(df_observed, N, Mon, B, thin.int)
@@ -20,14 +20,7 @@ PROBIT_imputation <- function(df_observed, n_imputations){
   sampled_y <- output_list[['sampled_y']]
   sampled_z <- output_list[['sampled_z']]
   
-  # perform convergence analysis
-  # trace plot
-  z.mcmc <- mcmc(sampled_z[,1,11], start=1)
-  plot(z.mcmc)
-  # auto correlation
-  autocorr.plot(z.mcmc)
-  
-  # extract 5 imputed dataset from probit model
+  # extract n_imputations imputed dataset from probit model
   imputation_index = as.integer(seq(1,dim(sampled_y)[1], length.out = n_imputations))
   imputation_list = list()
   

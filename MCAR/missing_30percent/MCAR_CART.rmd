@@ -62,6 +62,7 @@ set.seed(0)
 output_list <- sampleMCAR(n, missing_prob)
 df <- output_list[['df']]
 df_observed <- output_list[['df_observed']]
+apply(is.na(df_observed), MARGIN = 2, mean)
 ```
 
 ### MICE-CART

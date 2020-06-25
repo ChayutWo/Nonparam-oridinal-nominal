@@ -63,7 +63,9 @@ set.seed(0)
 
 df <- sample_PUMS(n)
 df_observed <- make_MCAR(df, missing_prob)
+apply(is.na(df_observed), MARGIN = 2, mean)
 ```
+
 
 ### MICE-CART
 Create 5 imputed dataset

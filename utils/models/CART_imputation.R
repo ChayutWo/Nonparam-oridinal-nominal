@@ -1,3 +1,4 @@
+library(mice)
 CART_imputation <- function(df_observed, n_imputations){
   # Perform missing data imputation using CART approach
   # df_observed: observed dataset

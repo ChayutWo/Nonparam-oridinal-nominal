@@ -53,15 +53,16 @@ library(coda)
 * * *
 ```{r}
 # sample MCAR dataset from PUMS
-source("../../utils/sampleMCAR.R")
+source("../../utils/sample_PUMS.R")
+source("../../utils/make_MCAR.R")
 n = 10000
 missing_col = c(1,3,7,9,10,11)
 missing_prob = 0.3
 set.seed(0)
 
-output_list <- sampleMCAR(n, missing_prob)
-df <- output_list[['df']]
-df_observed <- output_list[['df_observed']]
+df <- sample_PUMS(n)
+df_observed <- make_MCAR(df, missing_prob)
+apply(is.na(df_observed), MARGIN = 2, mean)
 ```
 
 
@@ -78,6 +79,10 @@ Diagnostics
 source("../../utils/create_report.R")
 create_report(imputation_list, max_nway=4, missing_col, df_observed)
 ```
+
+
+
+
 * * *
 
 

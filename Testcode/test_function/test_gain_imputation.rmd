@@ -52,16 +52,11 @@ library(coda)
 
 * * *
 ```{r}
-# sample MCAR dataset from PUMS
-source("../../utils/sampleMCAR.R")
-n = 10000
-missing_col = c(1,3,7,9,10,11)
-missing_prob = 0.3
-set.seed(0)
-
-output_list <- sampleMCAR(n, missing_prob)
-df <- output_list[['df']]
-df_observed <- output_list[['df_observed']]
+source('../../utils/load_data.R')
+data_name = 'fully_observed/fully_observed_1'
+missing_data_name = 'MCAR_30/MCAR_30_1'
+df_observed = load_data(missing_data_name)
+df = load_data(data_name)
 ```
 
 
@@ -70,12 +65,9 @@ df_observed <- output_list[['df_observed']]
 
 
 ```{r}
-source('../../utils/load_data.R')
-data_name = 'fully_observed/fully_observed_1'
-missing_data_name = 'MCAR_30/MCAR_30_1'
-df_observed = load_data(missing_data_name)
+
 source('../../utils/models/GAIN_imputation.R')
-imputation_list = GAIN_imputation(data_name, missing_data_name, 5, df_observed)
+imputation_list = GAIN_imputation(data_name, missing_data_name, 10, df_observed)
 ```
 
 

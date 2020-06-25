@@ -8,16 +8,11 @@ calculate_statistics <- function(imputation_list, n_way, missing_col){
   # a list comprising of mean (q_bar), within group variance (u_bar), 
   # across group variance (b) and degree of freedom (dof) of each level combination
   
-  # Unpack imputation_list
-  d1 = imputation_list[[1]]
-  d2 = imputation_list[[2]]
-  d3 = imputation_list[[3]]
-  d4 = imputation_list[[4]]
-  d5 = imputation_list[[5]]
-  
-  n_observation = dim(d1)[1]
-  n_imputations = 5
-  
+  n_observation = dim(imputation_list[[1]])[1]
+  n_imputations = length(imputation_list)
+  if (n_observation!=10000) {
+    print('Warning: n_observation is not 10000')
+  }
   # Prepare output format
   q_bar = c() # mean estimate across five imputation sets
   u_bar = c() # within group variance
@@ -32,21 +27,15 @@ calculate_statistics <- function(imputation_list, n_way, missing_col){
     if (any(missing_col %in% variables)) {
       # if one of the combination has missing values
       # Calculate contingency table respect to that combination
-      cont_table_1 = c(table(d1[,variables]))
-      cont_table_2 = c(table(d2[,variables]))
-      cont_table_3 = c(table(d3[,variables]))
-      cont_table_4 = c(table(d4[,variables]))
-      cont_table_5 = c(table(d5[,variables]))
-      # Normalize contingency table
-      cont_table_1 = cont_table_1/sum(cont_table_1)
-      cont_table_2 = cont_table_2/sum(cont_table_2)
-      cont_table_3 = cont_table_3/sum(cont_table_3)
-      cont_table_4 = cont_table_4/sum(cont_table_4)
-      cont_table_5 = cont_table_5/sum(cont_table_5)
-      
-      # Combind them into one table: n_imputationxn_combinations
-      cont_table = rbind(cont_table_1, cont_table_2, cont_table_3, cont_table_4, cont_table_5)
-      
+      cont_table = c()
+      for (imputation in 1:n_imputations) {
+        # extract dataframe of that imputation
+        d = imputation_list[[imputation]]
+        temp_cont_table = c(table(d[,variables]))
+        temp_cont_table = temp_cont_table/sum(temp_cont_table)
+        cont_table = rbind(cont_table, temp_cont_table)
+      }
+
       # Calculate MI estimate of P
       mean_estimate = apply(cont_table, MARGIN = 2, FUN = mean)
       q_bar = c(q_bar, mean_estimate)
@@ -70,3 +59,40 @@ calculate_statistics <- function(imputation_list, n_way, missing_col){
   
   return(output_list)
 }
+
+cal_save_stat <- function(imputation_list, model_name, missing_data_name, max_nway){
+  # Calculate statistics by calling calculate_statistics function upto prespecified nway
+  # Save it to result folder 
+  # imputation_list: a list containing multiple imputation df
+  # model_name: name of the model and folder to save file
+  # missing_data_name: prefix of the file to be saved
+  # max_nway: maximum number of ways in joint distribution calculation
+  
+  # Prepare root to save the file
+  root = paste('../../Results/',model_name,'/', missing_data_name, sep = '')
+  missing_col = c(1,3,7,9,10,11)
+  for (i in 1:max_nway) {
+    # calculate statistics for that number of way
+    output_list = calculate_statistics(imputation_list, n_way=i, missing_col)
+    # extract result dof, mean_estimate, within group variance and between group variance
+    dof = output_list[['dof']]
+    mean_estimate = output_list[['q_bar']]
+    within_group_var = output_list[['u_bar']]
+    across_group_var = output_list[['b']]
+    
+    # save result
+    dof_name = paste(root,'_dof_',i,'way.csv', sep = '')
+    write.table(dof, dof_name, row.names = FALSE, sep = ',')
+    
+    q_bar_name = paste(root,'_q_bar_',i,'way.csv', sep = '')
+    write.table(mean_estimate, q_bar_name, row.names = FALSE, sep = ',')
+    
+    u_bar_name = paste(root,'_u_bar_',i,'way.csv', sep = '')
+    write.table(within_group_var, u_bar_name, row.names = FALSE, sep = ',')
+    
+    b_name = paste(root,'_b_',i,'way.csv', sep = '')
+    write.table(across_group_var, b_name, row.names = FALSE, sep = ',')
+  }
+}
+
+

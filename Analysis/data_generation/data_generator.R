@@ -1,6 +1,9 @@
 # This code generate 100 subsample of the PUMS original data each with 10000 observations
 # It then made each of those 100 dataset missing according to 4 missing mechanism
-set.seed(0)
+library(MASS)
+library(tidyverse)
+
+setwd("~/DS_Projects/Nonparam-oridinal-nominal/Analysis/data_generation")
 source("../../utils/sample_PUMS.R")
 source("../../utils/make_MCAR.R")
 source("../../utils/make_MAR_30.R")
@@ -18,7 +21,7 @@ root_MCAR_45 <- '../../Datasets/MCAR_45/MCAR_45_'
 root_MAR_30 <- '../../Datasets/MAR_30/MAR_30_'
 root_MAR_45 <- '../../Datasets/MAR_45/MAR_45_'
 
-for (i in 1:2) {
+for (i in 1:100) {
   # Generate a full set of fully observed and missing dataframes
   df <- sample_PUMS(n)
   df_MCAR_30 <- make_MCAR(df, 0.3)
@@ -40,6 +43,6 @@ for (i in 1:2) {
   write.table(df_MAR_30, name_MAR_30, row.names = FALSE, sep = ',')
   write.table(df_MAR_45, name_MAR_45, row.names = FALSE, sep = ',')
   
-  cat(paste('finish generating',i,'datasets'))
+  cat(paste('finish generating',i,'datasets','\n'))
 }
 

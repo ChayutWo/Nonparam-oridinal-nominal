@@ -122,7 +122,7 @@ alpha <- output$alpha
 result <- model$snapshot
 
 #convert ImputedX matrix to dataframe, using proper factors/names etc. 
-ImputedX <- GetDataFrame(result$ImputedX,df)
+ImputedX <- GetDataFrame(result$ImputedX,df_observed)
 
 # extract 5 imputed dataset from DP model
 imputation_index = as.integer(seq(1,dim(imputed_df)[1], length.out = 5))

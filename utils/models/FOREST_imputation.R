@@ -1,3 +1,4 @@
+library(missForest)
 FOREST_imputation <- function(df_observed, n_imputations){
   # Perform missing data imputation using random forest approach
   # df_observed: observed dataset

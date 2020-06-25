@@ -1,3 +1,4 @@
+library(mice)
 MICE_imputation <- function(df_observed, n_imputations){
   # Perform missing data imputation using MICE approach
   # df_observed: observed dataset

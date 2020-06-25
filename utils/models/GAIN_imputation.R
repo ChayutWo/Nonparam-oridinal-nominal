@@ -8,17 +8,18 @@ GAIN_imputation <- function(data_name, missing_data_name, n_imputations, df_obse
   # a list comprising of imputed datasets
   
   # change directory to GAIN
+  currentloc <- getwd()
   setwd('../../GAIN/')
   
   # create command to run GAIN: command
   command = paste('/usr/local/bin/python3 main.py --data_name', data_name, '--missing_data_name',
                    missing_data_name,'--num_imputations', n_imputations)
   
-  # perform GAIN modeling and save 5 imputed datasets
+  # perform GAIN modeling and save n_imputations imputed datasets
   system(command, wait = TRUE)
   
   # change working directory back to current location
-  setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+  setwd(currentloc)
 
   # load GAIN imputed datasets and format into list
   levels = c(7,7,7,19,5,4,7,2,17,3,13)
@@ -33,6 +34,7 @@ GAIN_imputation <- function(data_name, missing_data_name, n_imputations, df_obse
     for (col_index in 1:ncol(df_observed)) {
       d[,col_index] = factor(d[,col_index], levels = 1:levels[col_index], ordered = TRUE)
     }
+
     imputation_list[[i]] = d
     # remove that file
     command = paste('rm', filename)

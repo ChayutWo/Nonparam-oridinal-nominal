@@ -78,6 +78,8 @@ Diagnostics
 source("../../utils/create_report.R")
 create_report(imputation_list, max_nway=4, missing_col, df_observed)
 ```
+
+
 * * *
 
 
