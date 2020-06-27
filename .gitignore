@@ -43,3 +43,4 @@ report/*
 *.m
 *.ipynb
 *.RData
+Results/*
