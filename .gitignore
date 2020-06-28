@@ -44,3 +44,5 @@ report/*
 *.ipynb
 *.RData
 Results/*
+Analysis/run_model/R_lib/*
+Analysis/run_model/python_lib/*
