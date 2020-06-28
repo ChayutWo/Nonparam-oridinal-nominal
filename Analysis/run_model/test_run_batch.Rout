@@ -1,0 +1,69 @@
+
+R version 3.6.0 (2019-04-26) -- "Planting of a Tree"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> # Code to be called on batch mode:
+> # R CMD BATCH '--args 1' run_batch.R
+> # the argument is the index for the dataset
+> # clear workspace and load data
+> args <- commandArgs(TRUE)
+> print(args)
+[1] "265"
+> repindex <- as.numeric(args[1])
+> print(repindex)
+[1] 265
+> 
+> # define the dataset name
+> root_fully_observed = 'fully_observed/fully_observed_'
+> root_MCAR_30 = 'MCAR_30/MCAR_30_'
+> root_MCAR_45 = 'MCAR_45/MCAR_45_'
+> root_MAR_30 = 'MAR_30/MAR_30_'
+> root_MAR_45 = 'MAR_45/MAR_45_'
+> 
+> # define simulation hyper parameter
+> n_imputations = 10
+> max_nway = 4
+> 
+> if (repindex <= 100) {
++   # repindex 1 - 100: MCAR_30 dataset
++   i = repindex
++   data_name = paste(root_fully_observed, i, sep='')
++   missing_data_name = paste(root_MCAR_30, i, sep = '')
++ }else if (repindex <= 200) {
++   # repindex 101-200: MCAR_45 dataset
++   i = repindex - 100
++   data_name = paste(root_fully_observed, i, sep='')
++   missing_data_name = paste(root_MCAR_45, i, sep = '')
++ }else if (repindex <= 300) {
++   # repindex 201-300: MAR_30 dataset
++   i = repindex - 200
++   data_name = paste(root_fully_observed, i, sep='')
++   missing_data_name = paste(root_MAR_30, i, sep = '')
++ }else if (repindex <= 400) {
++   # repindex 301-400: MAR_45 dataset
++   i = repindex - 300
++   data_name = paste(root_fully_observed, i, sep='')
++   missing_data_name = paste(root_MAR_45, i, sep = '')
++ }
+> cat(paste('>> start running:', data_name, missing_data_name))
+>> start running: fully_observed/fully_observed_65 MAR_30/MAR_30_65> 
+> proc.time()
+   user  system elapsed 
+  0.275   0.092   0.368 
