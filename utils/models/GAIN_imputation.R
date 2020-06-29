@@ -9,6 +9,11 @@ GAIN_imputation <- function(data_name, missing_data_name, n_imputations, df_obse
   
   # change directory to GAIN
   currentloc <- getwd()
+  
+  # activate virtual env
+  command = 'source python_lib/.venv/mi-env/bin/activate'
+  system(command, wait = TRUE)
+  
   setwd('../../GAIN/')
   
   # create command to run GAIN: command
@@ -21,7 +26,10 @@ GAIN_imputation <- function(data_name, missing_data_name, n_imputations, df_obse
   
   # change working directory back to current location
   setwd(currentloc)
-
+  
+  # deactivate virtual environment
+  system('deactivate', wait = TRUE)
+  
   # load GAIN imputed datasets and format into list
   levels = c(7,7,7,19,5,4,7,2,17,3,13)
   root = '../../GAIN/imputed_dataset/'
