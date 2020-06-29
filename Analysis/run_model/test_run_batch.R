@@ -2,6 +2,12 @@
 # R CMD BATCH '--args 1' run_batch.R
 # the argument is the index for the dataset
 # clear workspace and load data
+
+library(mice)
+library(NPBayesImputeCat)
+library(missForest)
+library(tidyverse)
+
 args <- commandArgs(TRUE)
 print(args)
 repindex <- as.numeric(args[1])
