@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-#SBATCH --array=1-20
+#SBATCH --array=1-5
 module load R/3.6.0
 export R_LIBS=$HOME/Nonparam-oridinal-nominal/Analysis/run_model/R_lib
 cd ~/Nonparam-oridinal-nominal/Analysis/run_model/
