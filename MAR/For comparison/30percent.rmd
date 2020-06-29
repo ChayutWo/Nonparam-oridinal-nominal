@@ -1,0 +1,130 @@
+
+---
+title: "MAR 30% missing: For comparison"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+library(coda)
+```
+
+* * *
+
+```{r}
+# sample MCAR dataset from PUMS
+source("../../utils/sampleMAR30.R")
+n = 10000
+missing_col = c(1,3,7,9,10,11)
+set.seed(2)
+
+output_list <- sampleMAR30(n)
+df <- output_list[['df']]
+df_observed <- output_list[['df_observed']]
+
+apply(is.na(df_observed), MARGIN = 2, mean)
+```
+
+
+Assess bivariate joint distribution
+```{r, echo = FALSE}
+combinations = combn(1:11, 2)
+original_dist = c()
+observed_dist = c()
+for (i in 1:(dim(combinations)[2])) {
+  variables = combinations[, i]
+  # Compute the joint pmf in the original dataframe without missing values
+  original_pmf = table(df[,variables])
+  original_pmf = original_pmf/sum(original_pmf)
+      
+  # Compute the joint pmf in the imputed dataset and average over imputations
+  observed_pmf = table(df_observed[,variables])
+  observed_pmf = observed_pmf/sum(observed_pmf)
+  
+  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
+  observed_dist = rbind(observed_dist, matrix(observed_pmf, ncol = 1))
+}
+
+plot(original_dist, observed_dist, 
+     xlab = 'Original joint pmf', ylab = 'Observed joint pmf', 
+     main = "Bivariate pmf", ylim = c(0,0.8), xlim = c(0,0.8))
+abline(0,1, col = 'gray')
+abline(0,1.1, col = 'red')
+abline(0, 0.9, col = 'red')
+```
+
+
+Assess trivariate joint distribution
+```{r, echo = FALSE}
+combinations = combn(1:11, 3)
+original_dist = c()
+observed_dist = c()
+n= 0
+for (i in 1:(dim(combinations)[2])) {
+  variables = combinations[, i]
+  # Compute the joint pmf in the original dataframe without missing values
+  original_pmf = table(df[,variables])
+  original_pmf = original_pmf/sum(original_pmf)
+      
+  # Compute the joint pmf in the imputed dataset and average over imputations
+  observed_pmf = table(df_observed[,variables])
+  observed_pmf = observed_pmf/sum(observed_pmf)
+  
+  original_dist = rbind(original_dist, matrix(original_pmf, ncol = 1))
+  observed_dist = rbind(observed_dist, matrix(observed_pmf, ncol = 1))
+
+}
+
+plot(original_dist, observed_dist, 
+     xlab = 'Original joint pmf', ylab = 'Observed joint pmf', 
+     main = "Trivariate pmf", ylim = c(0,0.5), xlim = c(0,0.5))
+abline(0,1, col = 'gray')
+abline(0,1.1, col = 'red')
+abline(0, 0.9, col = 'red')
+```
+
+* * *
+
+
+

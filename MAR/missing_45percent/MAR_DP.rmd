@@ -1,0 +1,177 @@
+
+---
+title: "MAR 45% missing - DPMPM"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+library(coda)
+library(NPBayesImputeCat)
+```
+
+* * *
+```{r}
+# sample MCAR dataset from PUMS
+source("../../utils/sampleMAR45.R")
+n = 10000
+missing_col = c(1,3,7,9,10,11)
+set.seed(3)
+
+output_list <- sampleMAR45(n)
+df <- output_list[['df']]
+df_observed <- output_list[['df_observed']]
+
+apply(is.na(df_observed), MARGIN = 2, mean)
+```
+
+
+### DPMPM
+
+Multiple imputation using NPBayesImputeCat package
+
+Ref: https://cran.r-project.org/web/packages/NPBayesImputeCat/NPBayesImputeCat.pdf
+
+1. Create and initialize the Rcpp_Lcm model object using CreateModel with the following arguments:
+  - X: dataframe to be imptuted = df
+  - MCZ: dataframe with the definition of structural zero = NULL
+  - K: the maximum number of mixture components = 40
+  - Nmax: An upper truncation limit for the augmented sample size = 0
+  - aalpha: the hyper parameter alpha in stick-breaking prior = 0.25
+  - balpha: the hyper parameter beta in stick-breaking prior = 0.25
+  - seed = 0
+
+2. Set the tracer for the sampling process
+  - k_star: the effective cluster number
+  - psi: conditional multinomial probabilties
+  - ImputedX: imputation result
+
+3. Run the model using the method Run of Rcpp_Lcm class with the following arguments:
+  - burnin = 10000
+  - iter = 10000
+  - thinning = 5
+
+4. Obtain result
+
+```{r, results = 'hide'}
+N = 40
+Mon = 10000
+B = 10000
+thin.int = 5
+
+# 1. Create and initialize the Rcpp_Lcm model object
+model = CreateModel(X = df_observed, MCZ = NULL, K = N, Nmax = 0,
+                    aalpha = 0.25, balpha = 0.25, seed = 0)
+# 2. Set tracer
+model$SetTrace(c('k_star', 'psi', 'ImputedX', 'alpha'),Mon)
+
+# 3. Run model using Run(burnin, iter, thinning)
+model$Run(B,Mon,thin.int)
+```
+
+
+```{r}
+# Extract results and format output
+output <- model$GetTrace()
+k_star <- output$k_star
+psi <- output$psi
+imputed_df <- output$ImputedX
+alpha <- output$alpha
+
+#retrieve parameters from the final iteration 
+result <- model$snapshot
+
+#convert ImputedX matrix to dataframe, using proper factors/names etc. 
+ImputedX <- GetDataFrame(result$ImputedX,df)
+
+# extract 5 imputed dataset from DP model
+imputation_index = as.integer(seq(1,dim(imputed_df)[1], length.out = 5))
+imputation_list = list()
+levels = c(7,7,7,19,5,4,7,2,17,3,13)
+for (i in 1:length(imputation_index)) {
+  index = imputation_index[i]
+  # need to plus 1 here because the class index of DP function starts at 0
+  d = imputed_df[index,] + 1
+  dim(d) = dim(t(df_observed))
+  d = data.frame(t(d))
+  colnames(d) = colnames(df_observed)
+  # format columns of d
+  for (col_index in 1:ncol(df_observed)) {
+    d[,col_index] = factor(d[,col_index], levels = 1:levels[col_index], ordered = TRUE)
+  }
+  imputation_list[[i]] = d
+}
+```
+
+Diagnostics
+
+```{r, echo = FALSE}
+# The number of clusters/latent groups used
+plot(1:length(k_star), k_star, xlab = 'trials', 
+     ylab = 'number of active clusters', 
+     main = 'Number of clusters used over time', ylim = c(0,40))
+```
+
+```{r, echo = FALSE}
+# sampled alpha value for the stick breaking process
+plot(1:length(alpha), alpha, xlab = 'trials', 
+     ylab = 'alpha', type = 'l',
+     main = 'alpha value for the stick breaking process')
+```
+
+```{r, echo = FALSE}
+alpha.mcmc <- mcmc(alpha, start=1)
+# auto correlation
+autocorr.plot(alpha.mcmc)
+```
+
+
+```{r}
+source("../../utils/create_report.R")
+create_report(imputation_list, max_nway=4, missing_col, df_observed)
+```
+* * *
+
+
+

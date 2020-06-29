@@ -1,0 +1,105 @@
+
+---
+title: "MCAR 30% missing - Generative Adversarial Imputation Nets (GAIN)"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(mnormt)
+library(coda)
+```
+
+* * *
+```{r}
+# sample MCAR dataset from PUMS
+source("../../utils/sampleMCAR.R")
+n = 10000
+missing_col = c(1,3,7,9,10,11)
+missing_prob = 0.3
+set.seed(0)
+
+output_list <- sampleMCAR(n, missing_prob)
+df <- output_list[['df']]
+df_observed <- output_list[['df_observed']]
+```
+
+
+### Generative Adversarial Imputation Nets (GAIN)
+
+reference: https://arxiv.org/abs/1806.02920
+
+```{r}
+# Load imputed dataset
+d1 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_1.csv', header = FALSE, sep = ',')
+d2 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_2.csv', header = FALSE, sep = ',')
+d3 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_3.csv', header = FALSE, sep = ',')
+d4 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_4.csv', header = FALSE, sep = ',')
+d5 = read.csv('../../GAIN/imputed_dataset/MCAR_30percent_5.csv', header = FALSE, sep = ',')
+```
+
+```{r}
+# Format imputed dataset into list
+imputation_df = list(d1, d2, d3, d4, d5)
+imputation_list = list()
+levels = c(7,7,7,19,5,4,7,2,17,3,13)
+for (i in 1:5) {
+  # need to plus 1 here because the class index of DP function starts at 0
+  d = imputation_df[[i]]
+  colnames(d) = colnames(df_observed)
+  # format columns of d
+  for (col_index in 1:ncol(df_observed)) {
+    d[,col_index] = factor(d[,col_index], levels = 1:levels[col_index], ordered = TRUE)
+  }
+  imputation_list[[i]] = d
+}
+```
+
+Diagnostics
+
+```{r}
+source("../../utils/create_report.R")
+create_report(imputation_list, max_nway=4, missing_col, df_observed)
+```
+* * *
+
+
+
