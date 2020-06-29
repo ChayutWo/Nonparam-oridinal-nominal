@@ -40,7 +40,7 @@ GAIN_imputation <- function(data_name, missing_data_name, n_imputations, df_obse
     imputation_list[[i]] = d
     # remove that file
     command = paste('rm', filename)
-    #system(command, wait = TRUE)
+    system(command, wait = TRUE)
   }
   return(imputation_list)
 }
