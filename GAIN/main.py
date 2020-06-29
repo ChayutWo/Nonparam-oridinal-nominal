@@ -4,9 +4,6 @@ Reference: J. Yoon, J. Jordon, M. van der Schaar, "GAIN: Missing Data
            Imputation using Generative Adversarial Nets," ICML, 2018.
 Editor: Chayut Wongkamthong 05/07/2020
 '''
-# add directory to be run on DCC
-import sys
-sys.path.append('../Analysis/run_model/python_lib')
 # Necessary packages
 from __future__ import absolute_import
 from __future__ import division
