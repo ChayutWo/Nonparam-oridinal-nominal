@@ -45,4 +45,4 @@ if (repindex <= 100) {
   data_name = paste(root_fully_observed, i, sep='')
   missing_data_name = paste(root_MAR_45, i, sep = '')
 }
-cat(paste('>> start running:', data_name, missing_data_name))
+print(paste('>> start running:', data_name, missing_data_name))
