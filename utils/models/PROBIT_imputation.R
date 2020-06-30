@@ -7,7 +7,7 @@ PROBIT_imputation <- function(df_observed, n_imputations){
   # a list comprising of imputed datasets
   
   # Import imputation function
-  source("../../utils/models/probitBayes_by_cluster.R")
+  source("../../utils/models/probitBayes_by_cluster.r")
   # MCMC parameter
   N = 50
   Mon = 1000
