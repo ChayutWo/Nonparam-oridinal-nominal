@@ -22,16 +22,7 @@ DP_imputation <- function(df_observed, n_imputations){
 
   # Extract results and format output
   output <- model$GetTrace()
-  k_star <- output$k_star
-  psi <- output$psi
   imputed_df <- output$ImputedX
-  alpha <- output$alpha
-  
-  #retrieve parameters from the final iteration 
-  result <- model$snapshot
-
-  #convert ImputedX matrix to dataframe, using proper factors/names etc. 
-  ImputedX <- GetDataFrame(result$ImputedX,df_observed)
 
   # extract n_imputations imputed dataset from DP model
   imputation_index = as.integer(seq(1,dim(imputed_df)[1], length.out = n_imputations))

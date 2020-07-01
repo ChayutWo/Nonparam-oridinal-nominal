@@ -15,10 +15,7 @@ PROBIT_imputation <- function(df_observed, n_imputations){
   thin.int = 10
   
   # function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, seed = 0)
-  output_list <- probitBayesImputation(df_observed, N, Mon, B, thin.int)
-  
-  sampled_y <- output_list[['sampled_y']]
-  sampled_z <- output_list[['sampled_z']]
+  sampled_y <- probitBayesImputation(df_observed, N, Mon, B, thin.int)
   
   # extract n_imputations imputed dataset from probit model
   imputation_index = as.integer(seq(1,dim(sampled_y)[1], length.out = n_imputations))

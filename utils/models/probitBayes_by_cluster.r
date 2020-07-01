@@ -549,5 +549,5 @@ probitBayesImputation <- function(y, N = 40, Mon = 1000, B = 5000, thin.int = 5)
   cat(paste("total time per iteration ", round(total_time,3), "\n"))
   output_list <- list(sampled_y, sampled_z,p.probs,alpha,M)
   names(output_list) <- c('sampled_y', 'sampled_z','p.probs','alpha','M')
-  return(output_list)
+  return(sampled_y)
 }
