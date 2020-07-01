@@ -22,7 +22,7 @@ root_MAR_45 = 'MAR_45/MAR_45_'
 n_imputations = 10
 max_nway = 4
 
-for (repindex in 1:2) {
+for (repindex in 1:1) {
   if (repindex <= 100) {
     # repindex 1 - 100: MCAR_30 dataset
     i = repindex
