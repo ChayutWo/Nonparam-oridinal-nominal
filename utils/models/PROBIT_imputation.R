@@ -2,6 +2,7 @@ library(abind)
 library(mvtnorm)
 library(truncnorm)
 library(matrixStats)
+library(MCMCpack)
 PROBIT_imputation <- function(df_observed, n_imputations){
   # Perform missing data imputation using Bayesian Nonparametric modeling approach
   # df_observed: observed dataset
