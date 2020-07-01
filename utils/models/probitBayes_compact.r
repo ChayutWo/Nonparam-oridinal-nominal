@@ -1,4 +1,3 @@
-library(abind)
 probitBayesImputation <- function(y, N = 40, Mon = 1000, B = 5000, thin.int = 5){
   # Perform nonparametric Bayesian ordinal model for missing data imputation
   # y: dataframe containing NA
