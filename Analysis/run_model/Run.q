@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-#SBATCH --mem=4G
+#SBATCH --mem=6G
 #SBATCH --array=1-5,101-105,201-205,301-305
 module load R/3.6.0
 export R_LIBS=/work/cw403/Nonparam-oridinal-nominal/Analysis/run_model/R_lib
