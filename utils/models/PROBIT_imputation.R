@@ -15,9 +15,9 @@ PROBIT_imputation <- function(df_observed, n_imputations){
   source("../../utils/models/probitBayes_compact.r")
   # MCMC parameter
   N = 50
-  Mon = 1000
+  Mon = 100
   B = 5000
-  thin.int = 10
+  thin.int = 100
   
   # function(y, N = 40, Mon = 2000, B = 300, thin.int = 5, seed = 0)
   sampled_y <- probitBayesImputation(df_observed, N, Mon, B, thin.int)
