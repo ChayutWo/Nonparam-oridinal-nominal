@@ -25,7 +25,8 @@ PROBIT_imputation <- function(df_observed, n_imputations){
   # extract n_imputations imputed dataset from probit model
   imputation_index = as.integer(seq(1,dim(sampled_y)[1], length.out = n_imputations))
   imputation_list = list()
-  
+  print(dim(sample_y))
+  print(imputation_index)
   levels = c(7,7,7,19,5,4,7,2,17,3,13)
   for (i in 1:length(imputation_index)) {
     index = imputation_index[i]
