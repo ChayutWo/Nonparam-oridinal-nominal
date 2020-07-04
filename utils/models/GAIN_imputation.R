@@ -15,7 +15,7 @@ GAIN_imputation <- function(data_name, missing_data_name, n_imputations, df_obse
   # create command to run GAIN: command
   #command = paste('/usr/local/bin/python3 main.py --data_name', data_name, '--missing_data_name',
   #                 missing_data_name,'--num_imputations', n_imputations)
-  command = paste('python3 main.py --data_name', data_name, '--missing_data_name',
+  command = paste('python main.py --data_name', data_name, '--missing_data_name',
                   missing_data_name,'--num_imputations', n_imputations)
   # perform GAIN modeling and save n_imputations imputed datasets
   system(command, wait = TRUE)
