@@ -174,8 +174,8 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     discriminator_loss.append(D_loss_curr)
 
   ## save learning progression as a figure
-  # print('>>> exporting learning curve')
-  # plot_loss(generator_loss, discriminator_loss)
+  print('>>> exporting learning curve')
+  plot_loss(generator_loss, discriminator_loss)
 
   multiple_imputation = []
   for imputation_index in range(num_imputations):
