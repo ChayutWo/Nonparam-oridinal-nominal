@@ -1,5 +1,6 @@
 #! /bin/bash
 #
+#SBATCH -–mem=4G
 #SBATCH --array=1-400
 module load R/3.6.0
 module load Python/3.6.4
