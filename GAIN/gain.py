@@ -170,12 +170,12 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     sess.run([G_solver, G_loss_temp, MSE_loss],
              feed_dict = {X: X_mb, M: M_mb, H: H_mb})
     # save current loss
-    generator_loss.append(G_loss_curr+alpha*MSE_loss_curr)
+    generator_loss.append(G_loss_curr)
     discriminator_loss.append(D_loss_curr)
 
   ## save learning progression as a figure
-  # print('>>> exporting learning curve')
-  # plot_loss(generator_loss, discriminator_loss)
+  print('>>> exporting learning curve')
+  plot_loss(generator_loss, discriminator_loss)
 
   multiple_imputation = []
   for imputation_index in range(num_imputations):
