@@ -1,0 +1,101 @@
+
+---
+title: "Test function coverage"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+library(coda)
+```
+
+* * *
+```{r}
+model_name = 'DP'
+data_name = 'MCAR_30'
+n_way = 1
+n_imputations = 10
+```
+
+```{r}
+# import required functions
+source("../../utils/compute_coverage.R")
+```
+
+```{r}
+source("../../utils/load_result.R")
+source("../../utils/get_true_pmf.R")
+
+# get true pmf
+TRUE_Q = get_true_pmf(n_way)
+# load result
+output_list = load_result(model_name, data_name, n_way)
+q_bar = output_list[['q_bar']] # mean estimate
+u_bar = output_list[['u_bar']] # within group variance
+b = output_list[['b']] # between group variance
+dof = output_list[['dof']] # degree of freedom
+```
+
+```{r}
+# calculate total sd
+total_sd = sqrt((1+1/n_imputations)*b + u_bar)
+# calculate upper bound and lower bound of the 95% CI
+q_alpha = qt(0.975, df = dof)
+upper_bound = q_bar + q_alpha*total_sd
+lower_bound = q_bar - q_alpha*total_sd
+# calculate coverage 0/1 and return the mean of each pmf
+Q = matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE)
+coverage = apply((lower_bound<=Q) & (Q<=upper_bound), MARGIN = 2, FUN = mean)
+```
+
+```{r}
+coverage = compute_coverage(model_name, data_name, n_way, n_imputations)
+coverage2 = coverage_models(data_name, n_way, n_imputations)
+```
+
+
+* * *
+
+
+

@@ -53,7 +53,7 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
 
   # Boat comments: this is a hyper parameter
   # Hidden state dimensions
-  h_dim = int(dim)
+  h_dim = int(10*dim)
 
   # Boat comments: norm here is just (X - min)/max
   # Normalization

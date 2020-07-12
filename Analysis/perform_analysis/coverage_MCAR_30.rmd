@@ -1,0 +1,67 @@
+
+---
+title: "Coverage comparison of different models: MCAR_30"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(readr)
+```
+
+* * *
+
+```{r}
+source("../../utils/compute_coverage.R")
+data_name = 'MCAR_30'
+n_imputations = 10
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 1
+coverage = coverage_models(data_name, n_way, n_imputations)
+df = format_list(coverage)
+boxplot(df, col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Coverage (fraction)', ylim = c(0,1), 
+        main = paste('Coverage from different imputation methods: Univariate pmf'))
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 2
+coverage = coverage_models(data_name, n_way, n_imputations)
+df = format_list(coverage)
+boxplot(df, col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Coverage (fraction)', ylim = c(0,1), 
+        main = paste('Coverage from different imputation methods: Bivariate pmf'))
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 3
+coverage = coverage_models(data_name, n_way, n_imputations)
+df = format_list(coverage)
+boxplot(df, col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Coverage (fraction)', ylim = c(0,1), 
+        main = paste('Coverage from different imputation methods: Trivariate pmf'))
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 4
+coverage = coverage_models(data_name, n_way, n_imputations)
+df = format_list(coverage)
+boxplot(df, col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Coverage (fraction)', ylim = c(0,1), 
+        main = paste('Coverage from different imputation methods: Quadvariate pmf'))
+```
+
+
+* * *
+
+
+

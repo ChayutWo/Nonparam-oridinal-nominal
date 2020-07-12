@@ -1,0 +1,95 @@
+
+---
+title: "Test function rel_MSE"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+library(coda)
+```
+
+* * *
+```{r}
+model_name = 'CART'
+data_name = 'MAR_30'
+n_way = 1
+n_imputations = 10
+```
+
+```{r}
+source("../../utils/load_result.R")
+source("../../utils/get_true_pmf.R")
+source("../../utils/get_observed_pmf.R")
+source("../../utils/compute_rel_MSE.R")
+```
+
+```{r}
+# get true pmf
+TRUE_Q = get_true_pmf(n_way)
+
+# get observed pmf
+OBSERVED_Q = get_observed_pmf(n_way)
+output_list = load_result(model_name, data_name, n_way)
+q_bar = output_list[['q_bar']] # mean estimate
+u_bar = output_list[['u_bar']] # within group variance
+b = output_list[['b']] # between group variance
+dof = output_list[['dof']] # degree of freedom
+
+# compute the numerator and denominator part of the relative MSE
+Q = matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE)
+imputed_MSE = apply((q_bar - Q)^2, MARGIN = 2, FUN = sum)
+observed_MSE = apply((OBSERVED_Q - Q)^2, MARGIN = 2, FUN = sum)
+rel_MSE = imputed_MSE/observed_MSE
+```
+
+```{r}
+rel_MSE2 = rel_MSE_models(data_name, n_way)
+```
+
+
+* * *
+
+
+
