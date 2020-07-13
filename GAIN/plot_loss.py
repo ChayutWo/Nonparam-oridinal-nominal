@@ -4,7 +4,7 @@ Author: Chayut Wongkamthong 05/08/2020
 """
 import matplotlib.pyplot as plt
 
-def plot_loss(generator_loss, discriminator_loss):
+def plot_loss(generator_loss, discriminator_loss, mse_loss):
     """
     plot loss over training process and save figure
     Args:
@@ -33,4 +33,13 @@ def plot_loss(generator_loss, discriminator_loss):
     plt.ylim(bottom = 0)
     plt.title('GAIN Learning progression: Discriminator')
     fig.savefig('./plots/gain_discriminator.png')
+
+    # plot loss over iterations for mse loss
+    fig = plt.figure()
+    plt.plot(mse_loss, label='MSE loss')
+    plt.xlabel('iteration')
+    plt.ylabel('MSE loss')
+    plt.ylim(bottom = 0)
+    plt.title('GAIN Learning progression: MSE loss')
+    fig.savefig('./plots/gain_mse.png')
     return

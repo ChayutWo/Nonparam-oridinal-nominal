@@ -53,7 +53,7 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
 
   # Boat comments: this is a hyper parameter
   # Hidden state dimensions
-  h_dim = int(10*dim)
+  h_dim = int(100*dim)
 
   # Boat comments: norm here is just (X - min)/max
   # Normalization
@@ -128,7 +128,7 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
   
   ## GAIN loss
   D_loss_temp = -tf.reduce_mean(M * tf.log(D_prob + 1e-8) \
-                                + (1-M) * tf.log(1. - D_prob + 1e-8)) 
+                                + (1-M) * tf.log(1. - D_prob + 1e-8))
   
   G_loss_temp = -tf.reduce_mean((1-M) * tf.log(D_prob + 1e-8))
   
@@ -149,6 +149,7 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
   # Start Iterations
   generator_loss = []
   discriminator_loss = []
+  mse_loss = []
   for it in tqdm(range(iterations)):    
       
     # Sample batch
@@ -172,10 +173,10 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     # save current loss
     generator_loss.append(G_loss_curr)
     discriminator_loss.append(D_loss_curr)
-
+    mse_loss.append(MSE_loss_curr)
   ## save learning progression as a figure
   print('>>> exporting learning curve')
-  plot_loss(generator_loss, discriminator_loss)
+  plot_loss(generator_loss, discriminator_loss, mse_loss)
 
   multiple_imputation = []
   for imputation_index in range(num_imputations):
