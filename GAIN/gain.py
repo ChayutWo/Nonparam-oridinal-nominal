@@ -53,7 +53,7 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
 
   # Boat comments: this is a hyper parameter
   # Hidden state dimensions
-  h_dim = int(100*dim)
+  h_dim = int(10*dim)
 
   # Boat comments: norm here is just (X - min)/max
   # Normalization
@@ -127,20 +127,49 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
   D_prob = discriminator(Hat_X, H)
   
   ## GAIN loss
-  D_loss_temp = -tf.reduce_mean(M * tf.log(D_prob + 1e-8) \
-                                + (1-M) * tf.log(1. - D_prob + 1e-8))
-  
-  G_loss_temp = -tf.reduce_mean((1-M) * tf.log(D_prob + 1e-8))
-  
+  #D_loss_temp = -tf.reduce_mean(M * tf.log(D_prob + 1e-8) \
+  #                              + (1-M) * tf.log(1. - D_prob + 1e-8))
+
+  D_loss_temp = -tf.reduce_mean((M * tf.log(D_prob + 1e-8) \
+                                + (1-M) * tf.log(1. - D_prob + 1e-8))[:,0])
+  D_loss_temp = D_loss_temp -tf.reduce_mean((M * tf.log(D_prob + 1e-8) \
+                                 + (1 - M) * tf.log(1. - D_prob + 1e-8))[:, 2])
+  D_loss_temp = D_loss_temp - tf.reduce_mean((M * tf.log(D_prob + 1e-8) \
+                                              + (1 - M) * tf.log(1. - D_prob + 1e-8))[:, 6])
+  D_loss_temp = D_loss_temp - tf.reduce_mean((M * tf.log(D_prob + 1e-8) \
+                                              + (1 - M) * tf.log(1. - D_prob + 1e-8))[:, 8])
+  D_loss_temp = D_loss_temp - tf.reduce_mean((M * tf.log(D_prob + 1e-8) \
+                                              + (1 - M) * tf.log(1. - D_prob + 1e-8))[:, 9])
+  D_loss_temp = D_loss_temp - tf.reduce_mean((M * tf.log(D_prob + 1e-8) \
+                                              + (1 - M) * tf.log(1. - D_prob + 1e-8))[:, 10])
+  #G_loss_temp = -tf.reduce_mean((1-M) * tf.log(D_prob + 1e-8))
+  G_loss_temp = -tf.reduce_mean(((1 - M) * tf.log(D_prob + 1e-8))[:,0])
+  G_loss_temp = G_loss_temp -tf.reduce_mean(((1 - M) * tf.log(D_prob + 1e-8))[:, 2])
+  G_loss_temp = G_loss_temp - tf.reduce_mean(((1 - M) * tf.log(D_prob + 1e-8))[:, 6])
+  G_loss_temp = G_loss_temp - tf.reduce_mean(((1 - M) * tf.log(D_prob + 1e-8))[:, 8])
+  G_loss_temp = G_loss_temp - tf.reduce_mean(((1 - M) * tf.log(D_prob + 1e-8))[:, 9])
+  G_loss_temp = G_loss_temp - tf.reduce_mean(((1 - M) * tf.log(D_prob + 1e-8))[:, 10])
+
+  #MSE_loss = \
+  #tf.reduce_mean((M * X - M * G_sample)**2) / tf.reduce_mean(M)
   MSE_loss = \
-  tf.reduce_mean((M * X - M * G_sample)**2) / tf.reduce_mean(M)
-  
+  tf.reduce_mean((M * X - M * G_sample)[:,0]**2) / tf.reduce_mean(M[:,0])
+  MSE_loss = MSE_loss+ \
+    tf.reduce_mean((M * X - M * G_sample)[:, 0] ** 2) / tf.reduce_mean(M[:, 2])
+  MSE_loss = MSE_loss + \
+             tf.reduce_mean((M * X - M * G_sample)[:, 0] ** 2) / tf.reduce_mean(M[:, 6])
+  MSE_loss = MSE_loss + \
+             tf.reduce_mean((M * X - M * G_sample)[:, 0] ** 2) / tf.reduce_mean(M[:, 8])
+  MSE_loss = MSE_loss + \
+             tf.reduce_mean((M * X - M * G_sample)[:, 0] ** 2) / tf.reduce_mean(M[:, 9])
+  MSE_loss = MSE_loss + \
+             tf.reduce_mean((M * X - M * G_sample)[:, 0] ** 2) / tf.reduce_mean(M[:, 10])
   D_loss = D_loss_temp
   G_loss = G_loss_temp + alpha * MSE_loss 
   
   ## GAIN solver
-  D_solver = tf.train.AdamOptimizer().minimize(D_loss, var_list=theta_D)
-  G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_G)
+  D_solver = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(D_loss, var_list=theta_D)
+  G_solver = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(G_loss, var_list=theta_G)
   
   ## Iterations
   sess = tf.Session()
