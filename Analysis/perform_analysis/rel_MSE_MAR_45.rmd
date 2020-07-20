@@ -1,0 +1,67 @@
+
+---
+title: "Relative MSE comparison of different models: MAR_45"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(readr)
+```
+
+* * *
+
+```{r}
+source("../../utils/compute_rel_MSE.R")
+data_name = 'MAR_45'
+n_imputations = 10
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 1
+rel_MSE = rel_MSE_models(data_name, n_way)
+df = format_list(rel_MSE)
+boxplot(df, col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Relative MSE (fraction)', ylim = c(0,500), 
+        main = paste('Relative MSE from different imputation methods: Univariate pmf'))
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 2
+rel_MSE = rel_MSE_models(data_name, n_way)
+df = format_list(rel_MSE)
+boxplot(df, col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Relative MSE (fraction)', ylim = c(0,50), 
+        main = paste('Relative MSE from different imputation methods: Bivariate pmf'))
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 3
+rel_MSE = rel_MSE_models(data_name, n_way)
+df = format_list(rel_MSE)
+boxplot(df, col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Relative MSE (fraction)', ylim = c(0,10), 
+        main = paste('Relative MSE from different imputation methods: Trivariate pmf'))
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 4
+rel_MSE = rel_MSE_models(data_name, n_way)
+df = format_list(rel_MSE)
+boxplot(df, col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Relative MSE (fraction)', ylim = c(0,10), 
+        main = paste('Relative MSE from different imputation methods: Quanvariate pmf'))
+```
+
+
+* * *
+
+
+
