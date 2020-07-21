@@ -15,7 +15,7 @@ MICE_NOM_imputation <- function(df_observed, n_imputations){
   for (col_index in 1:ncol(df_temp)) {
     df_temp[,col_index] = factor(df_temp[,col_index], levels = 1:levels[col_index], ordered = FALSE)
   }
-  
+  print(class(df_temp[,1]))
   # perform MICE imputation
   imputed_df <-  mice(df_temp,m=n_imputations,print=F)
   
@@ -29,5 +29,6 @@ MICE_NOM_imputation <- function(df_observed, n_imputations){
     }
     imputation_list[[i]] = d
   }
+  print(class(imputation_list[[1]][,1]))
   return(imputation_list)
 }

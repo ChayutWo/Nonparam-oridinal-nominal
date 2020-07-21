@@ -1,0 +1,160 @@
+
+R version 3.6.0 (2019-04-26) -- "Planting of a Tree"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> # Code to be called on batch mode:
+> # R CMD BATCH '--args 1' run_batch.R
+> # the argument is the index for the dataset
+> library(tidyverse)
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+✔ ggplot2 3.2.1     ✔ purrr   0.3.4
+✔ tibble  3.0.1     ✔ dplyr   1.0.0
+✔ tidyr   1.1.0     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.5.0
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+> # clear workspace and load data
+> args <- commandArgs(TRUE)
+> print(args)
+[1] "118"
+> repindex <- as.numeric(args[1])
+> print(repindex)
+[1] 118
+> source('../../utils/models/run_all_models.R')
+> 
+> # define the dataset name
+> root_fully_observed = 'fully_observed/fully_observed_'
+> root_MCAR_30 = 'MCAR_30/MCAR_30_'
+> root_MCAR_45 = 'MCAR_45/MCAR_45_'
+> root_MAR_30 = 'MAR_30/MAR_30_'
+> root_MAR_45 = 'MAR_45/MAR_45_'
+> 
+> # define simulation hyper parameter
+> n_imputations = 10
+> max_nway = 4
+> 
+> if (repindex <= 100) {
++   # repindex 1 - 100: MCAR_30 dataset
++   i = repindex
++   data_name = paste(root_fully_observed, i, sep='')
++   missing_data_name = paste(root_MCAR_30, i, sep = '')
++ }else if (repindex <= 200) {
++   # repindex 101-200: MCAR_45 dataset
++   i = repindex - 100
++   data_name = paste(root_fully_observed, i, sep='')
++   missing_data_name = paste(root_MCAR_45, i, sep = '')
++ }else if (repindex <= 300) {
++   # repindex 201-300: MAR_30 dataset
++   i = repindex - 200
++   data_name = paste(root_fully_observed, i, sep='')
++   missing_data_name = paste(root_MAR_30, i, sep = '')
++ }else if (repindex <= 400) {
++   # repindex 301-400: MAR_45 dataset
++   i = repindex - 300
++   data_name = paste(root_fully_observed, i, sep='')
++   missing_data_name = paste(root_MAR_45, i, sep = '')
++ }
+> cat(paste('>> start running:', data_name, missing_data_name))
+>> start running: fully_observed/fully_observed_18 MCAR_45/MCAR_45_18> run_all_models(data_name, missing_data_name, n_imputations, max_nway)
+
+Attaching package: ‘mice’
+
+The following objects are masked from ‘package:base’:
+
+    cbind, rbind
+
+Loading required package: randomForest
+randomForest 4.6-14
+Type rfNews() to see new features/changes/bug fixes.
+
+Attaching package: ‘randomForest’
+
+The following object is masked from ‘package:dplyr’:
+
+    combine
+
+The following object is masked from ‘package:ggplot2’:
+
+    margin
+
+Loading required package: foreach
+
+Attaching package: ‘foreach’
+
+The following objects are masked from ‘package:purrr’:
+
+    accumulate, when
+
+Loading required package: itertools
+Loading required package: iterators
+Loading required package: Rcpp
+
+Attaching package: ‘matrixStats’
+
+The following object is masked from ‘package:itertools’:
+
+    product
+
+The following object is masked from ‘package:dplyr’:
+
+    count
+
+Loading required package: coda
+Loading required package: MASS
+
+Attaching package: ‘MASS’
+
+The following object is masked from ‘package:dplyr’:
+
+    select
+
+##
+## Markov Chain Monte Carlo Package (MCMCpack)
+## Copyright (C) 2003-2020 Andrew D. Martin, Kevin M. Quinn, and Jong Hee Park
+##
+## Support provided by the U.S. National Science Foundation
+## (Grants SES-0350646 and SES-0350613)
+##
+Parsed with column specification:
+cols(
+  VEH = col_double(),
+  MV = col_double(),
+  NP = col_double(),
+  RMSP = col_double(),
+  ENG = col_double(),
+  MARHT = col_double(),
+  SCHL = col_double(),
+  RACNUM = col_double(),
+  AGEP = col_double(),
+  WKL = col_double(),
+  PINCP = col_double()
+)
+>> complete loading data 2020-07-20 23:07:06 
+[1] "factor"
+[1] "ordered" "factor" 
+>> complete MICE_NOM imputation on MCAR_45/MCAR_45_18 2020-07-21 00:22:14 
+[1] "MICE_NOM 10"
+Warning message:
+Number of logged events: 300 
+> 
+> proc.time()
+    user   system  elapsed 
+4506.249    2.465 4512.275 
