@@ -79,8 +79,6 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     def generator(x,m):
         temperature = 0.5
         # Concatenate Mask and Data
-        #x = tf.dtypes.cast(x, np.float32)
-        #m = tf.dtypes.cast(m, np.float32)
         inputs = tf.concat(values = [x, m], axis = 1)
         G_h1 = tf.nn.leaky_relu(tf.matmul(inputs, G_W1) + G_b1)
         G_h2 = tf.nn.leaky_relu(tf.matmul(G_h1, G_W2) + G_b2)
@@ -111,14 +109,28 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     # loss function
     @tf.function
     def gain_Dloss(D_prob, mask):
-        D_loss_temp = -tf.reduce_mean(mask * tf.math.log(D_prob + 1e-8) +
-                                      (1 - mask) * tf.math.log(1. - D_prob + 1e-8))
+        missing_col = np.array([1, 3, 7, 9, 10, 11])-1
+        D_loss_temp = 0
+        current_ind = 0
+        for j in range(len(n_classes)):
+            M_current = mask[:, current_ind:current_ind + n_classes[j]]
+            D_prob_current = D_prob[:, current_ind:current_ind + n_classes[j]]
+
+            if j in missing_col:
+                # if that col is subjected to missing values
+                D_loss_temp += -tf.reduce_mean(M_current * tf.math.log(D_prob_current + 1e-7) +
+                                          (1 - M_current) * tf.math.log(1. - D_prob_current + 1e-7))
+            current_ind += n_classes[j]
+        #D_loss_temp = -tf.reduce_mean(mask * tf.math.log(D_prob + 1e-7) +
+        #                              (1 - mask) * tf.math.log(1. - D_prob + 1e-7))
+
         D_loss = D_loss_temp
         return D_loss
 
     @tf.function
     def gain_Gloss(sample, G_sample, D_prob, mask, n_classes):
-        G_loss_temp = -tf.reduce_mean((1 - mask) * tf.math.log(D_prob + 1e-8))
+        missing_col = np.array([1, 3, 7, 9, 10, 11]) - 1
+        G_loss_temp = -tf.reduce_mean((1 - mask) * tf.math.log(D_prob + 1e-7))
         # categorical loss
         reconstruct_loss = 0
         current_ind = 0
@@ -126,8 +138,9 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
             M_current = mask[:, current_ind:current_ind + n_classes[j]]
             G_sample_temp = G_sample[:, current_ind:current_ind + n_classes[j]]
             X_temp = sample[:, current_ind:current_ind + n_classes[j]]
-            reconstruct_loss += -tf.reduce_mean(M_current * X_temp * tf.math.log(M_current * G_sample_temp + 1e-8)) / tf.reduce_mean(
-                M_current)
+            if j in missing_col:
+                reconstruct_loss += -tf.reduce_mean(M_current * X_temp * tf.math.log(M_current * G_sample_temp + 1e-7)) / tf.reduce_mean(
+                    M_current)
             current_ind += n_classes[j]
 
         return G_loss_temp, reconstruct_loss
@@ -146,7 +159,6 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
 
         Dgradients = g.gradient(D_loss, theta_D)
         D_solver.apply_gradients(zip(Dgradients, theta_D))
-
         for i in range(3):
             with tf.GradientTape() as g:
                 # Generator
@@ -159,11 +171,12 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
                 G_loss = G_loss_temp + alpha*reconstructloss
             Ggradients = g.gradient(G_loss, theta_G)
             G_solver.apply_gradients(zip(Ggradients, theta_G))
-        return D_loss, G_loss, reconstructloss
+        return D_loss, G_loss_temp, reconstructloss
 
     ## GAIN solver
-    D_solver = tf.optimizers.Adam(learning_rate=0.00001)
-    G_solver = tf.optimizers.Adam(learning_rate=0.00001)
+    lr = 1e-4
+    D_solver = tf.optimizers.Adam(learning_rate=lr)
+    G_solver = tf.optimizers.Adam(learning_rate=lr)
 
 
     # Start Iterations
@@ -190,11 +203,8 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
 
             # Combine random vectors with observed vectors
             X_mb = M_mb * X_mb + (1-M_mb) * Z_mb
-
             D_loss_curr, G_loss_curr, reconstructloss = optimize_step(X_mb, M_mb, H_mb, n_classes)
-            pbar.set_description("D_loss: {:.3f}, G_loss: {:.3f}, Reconstruction loss: {:.3f}".format(D_loss_curr.numpy(),
-                                                                                                  G_loss_curr.numpy(),
-                                                                                                      reconstructloss.numpy()))
+            pbar.set_description("D_loss: {:.3f}, G_loss: {:.3f}, Reconstruction loss: {:.3f}".format(D_loss_curr.numpy(), G_loss_curr.numpy(),reconstructloss.numpy()))
             # save current loss
             generator_loss.append(G_loss_curr)
             discriminator_loss.append(D_loss_curr)
@@ -209,6 +219,7 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
         ## Return imputed data
         Z_mb = uniform_sampler(0, 0.01, no, input_dim)
         M_mb = data_train_m
+        M_mb = tf.dtypes.cast(M_mb, np.float32)
         X_mb = data_train
         X_mb = M_mb * X_mb + (1-M_mb) * Z_mb
 
@@ -226,5 +237,5 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
 
         multiple_imputation.append(imputed_cat)
 
-
+    print('finish GAIN_CAT')
     return multiple_imputation

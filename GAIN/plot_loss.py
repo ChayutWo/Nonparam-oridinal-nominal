@@ -21,7 +21,7 @@ def plot_loss(generator_loss, discriminator_loss, mse_loss):
     plt.plot(generator_loss, label = 'generator loss')
     plt.xlabel('iteration')
     plt.ylabel('generator loss')
-    plt.ylim(0,2)
+    #plt.ylim(0,2)
     plt.title('GAIN Learning progression: Generator')
     fig.savefig('./plots/gain_generator.png')
 
@@ -30,7 +30,7 @@ def plot_loss(generator_loss, discriminator_loss, mse_loss):
     plt.plot(discriminator_loss, label='discriminator loss')
     plt.xlabel('iteration')
     plt.ylabel('discriminator loss')
-    plt.ylim(0,2)
+    #plt.ylim(0,2)
     plt.title('GAIN Learning progression: Discriminator')
     fig.savefig('./plots/gain_discriminator.png')
 
@@ -39,7 +39,7 @@ def plot_loss(generator_loss, discriminator_loss, mse_loss):
     plt.plot(mse_loss, label='MSE loss')
     plt.xlabel('iteration')
     plt.ylabel('MSE loss')
-    plt.ylim(0,0.1)
+    #plt.ylim(0,0.1)
     plt.title('GAIN Learning progression: MSE loss')
     fig.savefig('./plots/gain_mse.png')
     return

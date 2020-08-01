@@ -12,6 +12,7 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   source('../../utils/models/FOREST_imputation.R')
   source('../../utils/models/DP_imputation.R')
   source('../../utils/models/GAIN_imputation.R')
+  source('../../utils/models/GAIN_CAT_imputation.R')
   source('../../utils/models/PROBIT_imputation.R')
   # source other utils code
   source('../../utils/load_data.R')
@@ -28,10 +29,10 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   #cat(paste('>> complete MICE imputation on',missing_data_name, Sys.time(),'\n'))
   #print(paste('MICE',length(imputation_list)))
   ##### run MICE_NOM #####
-  imputation_list = MICE_NOM_imputation(df_observed, n_imputations)
-  cal_save_stat(imputation_list, 'MICE_NOM', missing_data_name, max_nway)
-  cat(paste('>> complete MICE_NOM imputation on',missing_data_name, Sys.time(),'\n'))
-  print(paste('MICE_NOM',length(imputation_list)))
+  #imputation_list = MICE_NOM_imputation(df_observed, n_imputations)
+  #cal_save_stat(imputation_list, 'MICE_NOM', missing_data_name, max_nway)
+  #cat(paste('>> complete MICE_NOM imputation on',missing_data_name, Sys.time(),'\n'))
+  #print(paste('MICE_NOM',length(imputation_list)))
   ##### run CART #####
   #imputation_list = CART_imputation(df_observed, n_imputations)
   #cal_save_stat(imputation_list, 'CART', missing_data_name, max_nway)
@@ -52,6 +53,11 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   #cal_save_stat(imputation_list, 'GAIN', missing_data_name, max_nway)
   #cat(paste('>> complete GAIN imputation on',missing_data_name, Sys.time(),'\n'))
   #print(paste('GAIN',length(imputation_list)))
+  ##### run GAIN_CAT #####
+  imputation_list = GAIN_CAT_imputation(data_name, missing_data_name, n_imputations, df_observed)
+  cal_save_stat(imputation_list, 'GAIN_CAT', missing_data_name, max_nway)
+  cat(paste('>> complete GAIN_CAT imputation on',missing_data_name, Sys.time(),'\n'))
+  print(paste('GAIN_CAT',length(imputation_list)))
   ##### run PROBIT #####
   #imputation_list = PROBIT_imputation(df_observed, n_imputations)
   #cal_save_stat(imputation_list, 'PROBIT', missing_data_name, max_nway)

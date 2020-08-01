@@ -80,12 +80,12 @@ if __name__ == '__main__':
   parser.add_argument(
       '--batch_size',
       help='the number of samples in mini-batch',
-      default=128,
+      default=256,
       type=int)
   parser.add_argument(
       '--hint_rate',
       help='hint probability',
-      default=0.9,
+      default=0.5,
       type=float)
   parser.add_argument(
       '--alpha',
@@ -95,10 +95,10 @@ if __name__ == '__main__':
   parser.add_argument(
       '--iterations',
       help='number of training interations',
-      default=10000,
+      default=500,
       type=int)
   
   args = parser.parse_args() 
   
   # Calls main function  
-  imputed_data, rmse = main(args)
+  imputed_data = main(args)
