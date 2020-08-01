@@ -14,6 +14,7 @@ knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
 library(knitr)
 library(dplyr)
 library(readr)
+library(xtable)
 ```
 
 * * *
@@ -28,38 +29,44 @@ n_imputations = 10
 n_way = 1
 rel_MSE = rel_MSE_models(data_name, n_way)
 df = format_list(rel_MSE)
+```
+
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of Relative MSE for different imputation methods, and the premissing data with 30% values MAR (Marginal probabilities)', digits = 2)
+```
+
+```{r, fig.width=5, fig.height = 3}
 boxplot(df, col = 'light blue', xlab = 'Imputation method', 
         ylab = 'Relative MSE (fraction)', ylim = c(0,500), 
-        main = paste('Relative MSE from different imputation methods: Univariate pmf'))
+        main = paste('Relative MSE from different imputation methods: Marginal pmf'))
 ```
 
 ```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
 n_way = 2
 rel_MSE = rel_MSE_models(data_name, n_way)
 df = format_list(rel_MSE)
-boxplot(df, col = 'light blue', xlab = 'Imputation method', 
-        ylab = 'Relative MSE (fraction)', ylim = c(0,50), 
-        main = paste('Relative MSE from different imputation methods: Bivariate pmf'))
+```
+
+
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of Relative MSE for different imputation methods, and the premissing data with 30% values MAR (Bivariate probabilities)', digits = 2)
 ```
 
 ```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
 n_way = 3
 rel_MSE = rel_MSE_models(data_name, n_way)
 df = format_list(rel_MSE)
-boxplot(df, col = 'light blue', xlab = 'Imputation method', 
-        ylab = 'Relative MSE (fraction)', ylim = c(0,10), 
-        main = paste('Relative MSE from different imputation methods: Trivariate pmf'))
 ```
 
-```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
-n_way = 4
-rel_MSE = rel_MSE_models(data_name, n_way)
-df = format_list(rel_MSE)
-boxplot(df, col = 'light blue', xlab = 'Imputation method', 
-        ylab = 'Relative MSE (fraction)', ylim = c(0,10), 
-        main = paste('Relative MSE from different imputation methods: Quanvariate pmf'))
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of Relative MSE for different imputation methods, and the premissing data with 30% values MAR (Trivariate probabilities)', digits = 2)
 ```
-
 
 * * *
 

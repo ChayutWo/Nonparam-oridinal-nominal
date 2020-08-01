@@ -20,20 +20,26 @@ compute_coverage <- function(model_name, data_name, n_way, n_imputations){
   b = output_list[['b']] # between group variance
   dof = output_list[['dof']] # degree of freedom
   rm(output_list)
+  
   # calculate total sd
   total_sd = sqrt((1+1/n_imputations)*b + u_bar)
   rm(b, u_bar)
+  
   # calculate upper bound and lower bound of the 95% CI
   q_alpha = qt(0.975, df = dof)
   rm(dof)
   upper_bound = q_bar + q_alpha*total_sd
   lower_bound = q_bar - q_alpha*total_sd
   rm(q_bar, total_sd, q_alpha)
+  
   # calculate coverage 0/1 and return the mean of each pmf
   Q = matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE)
   coverage = apply((lower_bound<=Q) & (Q<=upper_bound), MARGIN = 2, FUN = mean)
   print(paste('>> finish computing coverage - model:', model_name,', dataset:', data_name,', n way:', n_way))
-  return(coverage)
+  
+  # remove column where TRUE_Q = 0
+  indicator = TRUE_Q !=0
+  return(coverage[indicator])
 }
 
 coverage_models <- function(data_name, n_way, n_imputations){
@@ -44,7 +50,7 @@ coverage_models <- function(data_name, n_way, n_imputations){
   
   # return: 
   # 
-  models = c('MICE', 'CART', 'FOREST', 'GAIN', 'DP', 'PROBIT')
+  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'DP', 'PROBIT')
   
   # output
   COVERAGE = list()

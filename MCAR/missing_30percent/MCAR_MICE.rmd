@@ -69,7 +69,7 @@ df_observed <- output_list[['df_observed']]
 Create 5 imputed dataset
 ```{r}
 library(mice)
-imputed_df <-  mice(df_observed,m=5,print=F)
+imputed_df <-  mice(df_observed,m=5,polr.to.loggedEvents = TRUE, print = FALSE)
 ```
 
 Extract the 5 imputed dataset

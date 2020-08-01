@@ -16,11 +16,15 @@ compute_bias <- function(model_name, data_name, n_way, TRUE_Q){
   q_bar = output_list[['q_bar']] # mean estimate
   rm(output_list)
   
+
   # compute the numerator and denominator part of the relative MSE
-  Q = matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE)
+  Q = (matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE))
   bias = apply(q_bar-Q, MARGIN = 2, FUN = mean)
   print(paste('>> finish computing bias - model:', model_name,', dataset:', data_name,', n way:', n_way))
-  return(bias)
+  
+  # remove column where TRUE_Q = 0
+  indicator = TRUE_Q !=0
+  return(bias[indicator])
 }
 
 bias_models <- function(data_name, n_way){
@@ -30,7 +34,7 @@ bias_models <- function(data_name, n_way){
   
   # return: BIAS
   # a list of bias for each of the models
-  models = c('MICE', 'CART', 'FOREST', 'GAIN', 'DP', 'PROBIT')
+  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'DP', 'PROBIT')
   
   # get true pmf
   TRUE_Q = get_true_pmf(n_way)

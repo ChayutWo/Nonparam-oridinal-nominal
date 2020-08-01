@@ -14,6 +14,7 @@ knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
 library(knitr)
 library(dplyr)
 library(readr)
+library(xtable)
 ```
 
 * * *
@@ -28,37 +29,45 @@ n_imputations = 10
 n_way = 1
 bias = bias_models(data_name, n_way)
 df = format_list(bias)
+```
+
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of bias for different imputation methods, and the premissing data with 30% values MAR (Marginal probabilities)', digits = 4)
+```
+
+```{r, fig.width=5, fig.height = 3}
+# boxplot for estimates for marginal distribution
 boxplot(df, col = 'light blue', xlab = 'Imputation method', 
         ylab = 'Bias', ylim = c(-0.05, 0.05),
-        main = 'Bias from different imputation methods: Univariate pmf')
+        main = 'Bias from different imputation methods: Marginal pmf')
 ```
 
 ```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
 n_way = 2
 bias = bias_models(data_name, n_way)
 df = format_list(bias)
-boxplot(df, col = 'light blue', xlab = 'Imputation method', 
-        ylab = 'Bias', ylim = c(-0.0025, 0.0025),
-        main = 'Bias from different imputation methods: Bivariate pmf')
+```
+
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of bias for different imputation methods, and the premissing data with 30% values MAR (Bivariate probabilities)', digits = 4)
 ```
 
 ```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
 n_way = 3
 bias = bias_models(data_name, n_way)
 df = format_list(bias)
-boxplot(df, col = 'light blue', xlab = 'Imputation method', 
-        ylab = 'Bias', ylim = c(-0.001, 0.001),
-        main = 'Bias from different imputation methods: Trivariate pmf')
 ```
 
-```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
-n_way = 4
-bias = bias_models(data_name, n_way)
-df = format_list(bias)
-boxplot(df, col = 'light blue', xlab = 'Imputation method', 
-        ylab = 'Bias', ylim = c(-0.001, 0.001),
-        main = 'Bias from different imputation methods: Quadvariate pmf')
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of bias for different imputation methods, and the premissing data with 30% values MAR (Trivariate probabilities)', digits = 4)
 ```
+
 * * *
 
 

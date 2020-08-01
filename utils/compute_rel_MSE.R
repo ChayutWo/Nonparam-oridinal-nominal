@@ -25,7 +25,10 @@ compute_rel_MSE <- function(model_name, data_name, n_way, TRUE_Q, OBSERVED_Q){
   rel_MSE = imputed_MSE/observed_MSE
   
   print(paste('>> finish computing relative MSE - model:', model_name,', dataset:', data_name,', n way:', n_way))
-  return(rel_MSE)
+  
+  # remove column where TRUE_Q = 0
+  indicator = TRUE_Q !=0
+  return(rel_MSE[indicator])
 }
 
 rel_MSE_models <- function(data_name, n_way){
@@ -35,7 +38,7 @@ rel_MSE_models <- function(data_name, n_way){
 
   # return: RELATIVE_MSE
   # a list of relative mse for each of the models
-  models = c('MICE', 'CART', 'FOREST', 'GAIN', 'DP', 'PROBIT')
+  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'DP', 'PROBIT')
   
   # get true pmf
   TRUE_Q = get_true_pmf(n_way)
