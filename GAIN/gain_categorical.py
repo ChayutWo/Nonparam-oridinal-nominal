@@ -79,6 +79,8 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     def generator(x,m):
         temperature = 0.5
         # Concatenate Mask and Data
+        #x = tf.dtypes.cast(x, np.float32)
+        #m = tf.dtypes.cast(m, np.float32)
         inputs = tf.concat(values = [x, m], axis = 1)
         G_h1 = tf.nn.leaky_relu(tf.matmul(inputs, G_W1) + G_b1)
         G_h2 = tf.nn.leaky_relu(tf.matmul(G_h1, G_W2) + G_b2)
@@ -177,7 +179,9 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
             batch_idx = indices[start_idx:start_idx + batch_size]
             X_mb = data_train[batch_idx, :]
             M_mb = data_train_m[batch_idx, :]
-
+            # convert everything to float32
+            #X_mb = tf.dtypes.cast(X_mb, np.float32)
+            M_mb = tf.dtypes.cast(M_mb, np.float32)
             # Sample random vectors
             Z_mb = uniform_sampler(0, 0.01, batch_size, input_dim)
             # Sample hint vectors
