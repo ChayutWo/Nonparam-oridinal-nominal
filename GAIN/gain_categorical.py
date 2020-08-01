@@ -8,7 +8,7 @@ Contact: jsyoon0823@gmail.com
 
 # Necessary packages
 import tensorflow as tf
-import tensorflow_probability as tfp
+#import tensorflow_probability as tfp
 import numpy as np
 from tqdm import tqdm
 
@@ -30,7 +30,7 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     data_cat = data_x
     data_cat_m = data_m
     # preprocess categorical variables
-    data_cat = np.nan_to_num(data_cat, 0)
+    data_cat = np.nan_to_num(data_cat, nan = 1)
     data_cat_enc, data_cat_enc_miss, n_classes, onehot_enc = onehot(data_cat, data_cat_m, all_levels)
 
     # concatenate to training data
@@ -43,9 +43,10 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     input_dim = data_train.shape[1]
 
     # Hidden state dimensions
-    h_Gdim = gain_parameters['h_Gdim']
-    h_Ddim = gain_parameters['h_Ddim']
-
+    #h_Gdim = gain_parameters['h_Gdim']
+    #h_Ddim = gain_parameters['h_Ddim']
+    h_Gdim = int(dim)
+    h_Ddim = int(dim)
     ## GAIN architecture
     # Discriminator variables
     D_W1 = tf.Variable(xavier_init([input_dim*2, h_Ddim])) # Data + Hint as inputs

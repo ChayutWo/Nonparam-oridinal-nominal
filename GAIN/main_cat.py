@@ -48,14 +48,14 @@ def main (args):
   imputed_data_x = gain(miss_data_x, num_imputations, gain_parameters, filename = missing_data_name)
 
   # Report the RMSE performance
-  rmse = 0
-  for i in range(num_imputations):
-    rmse += rmse_loss(ori_data_x, imputed_data_x[i], data_m)
-  rmse = rmse/num_imputations
-  print()
-  print('RMSE Performance: ' + str(np.round(rmse, 4)))
+  #rmse = 0
+  #for i in range(num_imputations):
+  #  rmse += rmse_loss(ori_data_x, imputed_data_x[i], data_m)
+  #rmse = rmse/num_imputations
+  #print()
+  #print('RMSE Performance: ' + str(np.round(rmse, 4)))
   
-  return imputed_data_x, rmse
+  return imputed_data_x
 
 if __name__ == '__main__':  
   """
