@@ -236,5 +236,5 @@ def gain (data_x, num_imputations, gain_parameters, filename = 'imputed'):
     print('>>> saving imputed dataset: ' + filepath)
     np.savetxt(filepath, imputed_cat, delimiter=',')
 
-    print('finish GAIN_CAT')
+    print('finish GAIN_CAT_DIFF')
     return imputed_cat
