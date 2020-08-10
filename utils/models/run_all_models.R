@@ -13,6 +13,8 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   source('../../utils/models/DP_imputation.R')
   source('../../utils/models/GAIN_imputation.R')
   source('../../utils/models/GAIN_CAT_imputation.R')
+  source('../../utils/models/GAIN_CAT_DIFF_imputation.R')
+  source('../../utils/models/GAIN_DIFF_imputation.R')
   source('../../utils/models/PROBIT_imputation.R')
   # source other utils code
   source('../../utils/load_data.R')
@@ -54,10 +56,20 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   #cat(paste('>> complete GAIN imputation on',missing_data_name, Sys.time(),'\n'))
   #print(paste('GAIN',length(imputation_list)))
   ##### run GAIN_CAT #####
-  imputation_list = GAIN_CAT_imputation(data_name, missing_data_name, n_imputations, df_observed)
-  cal_save_stat(imputation_list, 'GAIN_CAT', missing_data_name, max_nway)
-  cat(paste('>> complete GAIN_CAT imputation on',missing_data_name, Sys.time(),'\n'))
-  print(paste('GAIN_CAT',length(imputation_list)))
+  #imputation_list = GAIN_CAT_imputation(data_name, missing_data_name, n_imputations, df_observed)
+  #cal_save_stat(imputation_list, 'GAIN_CAT', missing_data_name, max_nway)
+  #cat(paste('>> complete GAIN_CAT imputation on',missing_data_name, Sys.time(),'\n'))
+  #print(paste('GAIN_CAT',length(imputation_list)))
+  ##### run GAIN_DIFF #####
+  imputation_list = GAIN_DIFF_imputation(data_name, missing_data_name, n_imputations, df_observed)
+  cal_save_stat(imputation_list, 'GAIN_DIFF', missing_data_name, max_nway)
+  cat(paste('>> complete GAIN_DIFF imputation on',missing_data_name, Sys.time(),'\n'))
+  print(paste('GAIN_DIFF',length(imputation_list)))
+  ##### run GAIN_CAT_DIFF #####
+  imputation_list = GAIN_CAT_DIFF_imputation(data_name, missing_data_name, n_imputations, df_observed)
+  cal_save_stat(imputation_list, 'GAIN_CAT_DIFF', missing_data_name, max_nway)
+  cat(paste('>> complete GAIN_CAT_DIFF imputation on',missing_data_name, Sys.time(),'\n'))
+  print(paste('GAIN_CAT_DIFF',length(imputation_list)))
   ##### run PROBIT #####
   #imputation_list = PROBIT_imputation(df_observed, n_imputations)
   #cal_save_stat(imputation_list, 'PROBIT', missing_data_name, max_nway)

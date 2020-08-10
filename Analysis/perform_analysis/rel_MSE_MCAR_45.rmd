@@ -34,7 +34,7 @@ df = format_list(rel_MSE)
 ```{r}
 summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
 rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
-xtable(summary, caption = 'Distribution of Relative MSE for different imputation methods, and the premissing data with 45% values MCAR (Marginal probabilities)', digits = 2)
+xtable(summary, caption = 'Distribution of relative MSE for different imputation methods for data with 45% values MCAR (Marginal probabilities)', digits = 1)
 ```
 
 ```{r, fig.width=5, fig.height = 3}
@@ -53,7 +53,7 @@ df = format_list(rel_MSE)
 ```{r}
 summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
 rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
-xtable(summary, caption = 'Distribution of Relative MSE for different imputation methods, and the premissing data with 45% values MCAR (Bivariate probabilities)', digits = 2)
+xtable(summary, caption = 'Distribution of relative MSE for different imputation methods for data with 45% values MCAR (Bivariate probabilities)', digits = 1)
 ```
 
 ```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
@@ -65,7 +65,7 @@ df = format_list(rel_MSE)
 ```{r}
 summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
 rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
-xtable(summary, caption = 'Distribution of Relative MSE for different imputation methods, and the premissing data with 45% values MCAR (Trivariate probabilities)', digits = 2)
+xtable(summary, caption = 'Distribution of relative MSE for different imputation methods for data with 45% values MCAR (Trivariate probabilities)', digits = 1)
 ```
 
 * * *

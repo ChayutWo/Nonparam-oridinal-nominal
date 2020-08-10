@@ -34,7 +34,7 @@ bias_models <- function(data_name, n_way){
   
   # return: BIAS
   # a list of bias for each of the models
-  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'DP', 'PROBIT')
+  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'GAIN_CAT', 'DP', 'PROBIT')
   
   # get true pmf
   TRUE_Q = get_true_pmf(n_way)

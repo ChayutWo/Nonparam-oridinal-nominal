@@ -1,0 +1,55 @@
+
+---
+title: "Marginal pmf comparison: MAR_30"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(readr)
+library(xtable)
+```
+
+* * *
+
+```{r}
+source("../../utils/pmf_comparison_plot.R")
+```
+
+
+
+```{r, fig.width=5, fig.height = 3, warning = FALSE, message=FALSE}
+data_name = 'MAR_30'
+pmf_comparison_plot(data_name, n_way = 1)
+pmf_comparison_plot(data_name, n_way = 2)
+```
+
+```{r, fig.width=5, fig.height = 3, warning = FALSE, message=FALSE}
+data_name = 'MAR_45'
+pmf_comparison_plot(data_name, n_way = 1)
+pmf_comparison_plot(data_name, n_way = 2)
+```
+
+```{r, fig.width=5, fig.height = 3, warning = FALSE, message=FALSE}
+data_name = 'MCAR_30'
+pmf_comparison_plot(data_name, n_way = 1)
+pmf_comparison_plot(data_name, n_way = 2)
+```
+
+```{r, fig.width=5, fig.height = 3, warning = FALSE, message=FALSE}
+data_name = 'MCAR_45'
+pmf_comparison_plot(data_name, n_way = 1)
+pmf_comparison_plot(data_name, n_way = 2)
+```
+
+* * *
+
+
+

@@ -52,7 +52,7 @@ library(coda)
 
 * * *
 ```{r}
-model_name = 'DP'
+model_name = 'GAIN'
 data_name = 'MCAR_30'
 n_way = 1
 n_imputations = 10

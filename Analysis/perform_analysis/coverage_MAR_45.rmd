@@ -29,12 +29,13 @@ n_imputations = 10
 n_way = 1
 coverage = coverage_models(data_name, n_way, n_imputations)
 df = format_list(coverage)
+df_1way = df
 ```
 
 ```{r}
 summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
 rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
-xtable(summary, caption = 'Distribution of coverage for different imputation methods, and the premissing data with 45% values MAR (Marginal probabilities)', digits = 2)
+xtable(summary, caption = 'Distribution of coverage for different imputation methods for data with 45% values MAR (Marginal probabilities)', digits = 2)
 ```
 
 ```{r, fig.width=5, fig.height = 3}
@@ -48,13 +49,26 @@ boxplot(df, col = 'light blue', xlab = 'Imputation method',
 n_way = 2
 coverage = coverage_models(data_name, n_way, n_imputations)
 df = format_list(coverage)
+df_2way = df
 ```
 
 ```{r}
 summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
 rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
-xtable(summary, caption = 'Distribution of coverage for different imputation methods, and the premissing data with 45% values MAR (Bivariate probabilities)', digits = 2)
+xtable(summary, caption = 'Distribution of coverage for different imputation methods for data with 45% values MAR (Bivariate probabilities)', digits = 2)
 ```
+
+```{r, fig.width=5, fig.height = 3}
+par(mfrow=c(1,2), oma = c(5.5,4.5,0.2,0.2) + 0.1, mar = c(0.25,0.25,1.25,1.25) + 0.1)
+boxplot(df_1way, col = 'light blue', ylim = c(0,1), main = paste('Coverage: Marginal pmf'),
+        las = 2)
+boxplot(df_2way, col = 'peachpuff', ylim = c(0,1), main = paste('Coverage: Bivariate pmf'), 
+        las = 2, yaxt="n")
+axis(2, labels=FALSE)
+title(ylab = "Coverage (fraction)",
+      outer = TRUE, line = 3)
+```
+
 
 ```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
 n_way = 3
@@ -65,7 +79,7 @@ df = format_list(coverage)
 ```{r}
 summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
 rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
-xtable(summary, caption = 'Distribution of coverage for different imputation methods, and the premissing data with 45% values MAR (Trivariate probabilities)', digits = 2)
+xtable(summary, caption = 'Distribution of coverage for different imputation methods for data with 45% values MAR (Trivariate probabilities)', digits = 2)
 ```
 
 * * *

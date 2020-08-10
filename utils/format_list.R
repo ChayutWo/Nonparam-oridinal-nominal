@@ -5,9 +5,9 @@ format_list <- function(input_list){
   # return: df
   # a dataframe which each column is the result from each model
 
-  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'DP', 'PROBIT')
+  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'GAIN_CAT', 'DP', 'PROBIT')
   df = cbind(input_list[['MICE_NOM']],input_list[['MICE']], input_list[['CART']], input_list[['FOREST']], 
-             input_list[['GAIN']], input_list[['DP']], input_list[['PROBIT']])
-  colnames(df) = c('MI-nom', 'MI-ord', 'MI-cart', 'Forest', 'GAIN', 'DPMPM', 'DPMMVN')
+             input_list[['GAIN']], input_list[['GAIN_CAT']], input_list[['DP']], input_list[['PROBIT']])
+  colnames(df) = c('MI-nom', 'MI-ord', 'MI-cart', 'Forest', 'GAIN', 'GAINcat', 'DPMPM', 'DPMMVN')
   return(df)
 }
