@@ -1,4 +1,4 @@
-GAIN_imputation <- function(data_name, missing_data_name, n_imputations, df_observed){
+GAIN_DIFF_imputation <- function(data_name, missing_data_name, n_imputations, df_observed){
   # Perform missing data imputation using GAIN modeling approach
   # data_name and missing_data_name is file location after entering Datasets folder
   # n_imputations: number of imputation to be performed

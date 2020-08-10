@@ -1,4 +1,4 @@
-GAIN_CAT_imputation <- function(data_name, missing_data_name, n_imputations, df_observed){
+GAIN_CAT_DIFF_imputation <- function(data_name, missing_data_name, n_imputations, df_observed){
   # Perform missing data imputation using GAIN modeling approach with cross entropy loss
   # data_name and missing_data_name is file location after entering Datasets folder
   # n_imputations: number of imputation to be performed
