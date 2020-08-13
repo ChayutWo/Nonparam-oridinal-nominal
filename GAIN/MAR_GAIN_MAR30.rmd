@@ -1,0 +1,148 @@
+
+---
+title: "MAR 30% missing - Generative Adversarial Imputation Nets (GAIN)"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(mnormt)
+library(coda)
+```
+
+* * *
+
+
+### Generative Adversarial Imputation Nets (GAIN)
+
+reference: https://arxiv.org/abs/1806.02920
+
+```{r}
+# Load imputed dataset
+d1 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_1.csv', header = FALSE, sep = ',')
+d2 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_2.csv', header = FALSE, sep = ',')
+d3 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_3.csv', header = FALSE, sep = ',')
+d4 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_4.csv', header = FALSE, sep = ',')
+d5 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_5.csv', header = FALSE, sep = ',')
+d6 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_6.csv', header = FALSE, sep = ',')
+d7 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_7.csv', header = FALSE, sep = ',')
+d8 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_8.csv', header = FALSE, sep = ',')
+d9 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_9.csv', header = FALSE, sep = ',')
+d10 = read.csv('./imputed_dataset/MAR_30/MAR_30_1_10.csv', header = FALSE, sep = ',')
+load('../Datasets/ordinalPUMS.Rdata')
+```
+
+```{r}
+# Format imputed dataset into list
+imputation_df = list(d1, d2, d3, d4, d5,d6,d7,d8,d9,d10)
+imputation_list = list()
+levels = c(7,7,7,19,5,4,7,2,17,3,13)
+for (i in 1:10) {
+  # need to plus 1 here because the class index of DP function starts at 0
+  d = imputation_df[[i]]
+  colnames(d) = colnames(df)
+  # format columns of d
+  for (col_index in 1:ncol(df)) {
+    d[,col_index] = factor(d[,col_index], levels = 1:levels[col_index], ordered = TRUE)
+  }
+  imputation_list[[i]] = d
+}
+```
+
+Diagnostics
+
+```{r}
+plot_hist2 <- function(imputation_list){
+  # Plot histogram comparing orignal, observed and imputed pmf
+  # imputation_list: a list containing multiple imputation df
+  # df_observed: dataframe with missing values
+  # missing_col: The column subjected to missing values
+  
+  # return: NULL
+  
+  # Load original dataset
+  
+  # Extract imputed dataset from imputaion_list and format it
+  d1 = imputation_list[[1]]
+  d2 = imputation_list[[2]]
+  d3 = imputation_list[[3]]
+  d4 = imputation_list[[4]]
+  d5 = imputation_list[[5]]
+  d6 = imputation_list[[6]]
+  d7 = imputation_list[[7]]
+  d8 = imputation_list[[8]]
+  d9 = imputation_list[[9]]
+  d10 = imputation_list[[10]]
+
+  imputed_sets = rbind(d1, d2, d3, d4, d5, d6, d7, d8, d9, d10)
+  
+  par(mfrow=c(2,2), oma = c(5.5,4.5,4,0.2) + 0.1, mar = c(0.25,0.25,1.25,1.25) + 0.1, cex = 1.5, cex.axis = 0.8)
+  for (var_index in c(1,3,7,11)) {
+    # Population distribution
+    y_original = df[,var_index]
+    original_pmf = table(y_original)/length(y_original)
+    
+    # Extract variable from imputed data
+    imputed_pmf = table(imputed_sets[, var_index])/length(imputed_sets[, var_index])
+    results = rbind(original_pmf,imputed_pmf)
+    colnames(results)<- 1:dim(imputed_pmf)
+    if(var_index == 3){
+      barplot(results, beside = TRUE, 
+            legend = TRUE, ylim = c(0,0.4))
+    }else{
+      barplot(results, beside = TRUE, ylim = c(0,0.5))
+    }
+    
+  }
+  title(xlab='Level', ylab = 'pmf', outer = TRUE, line = 3)
+  mtext('Distribution of imputed datasets from GAINcat: ACS', side = 3, outer=TRUE, cex = 1.75, line = 1.5)
+}
+```
+
+```{r, fig.width=16, fig.height=10}
+plot_hist2(imputation_list)
+```
+
+
+* * *
+
+
+

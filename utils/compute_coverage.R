@@ -51,7 +51,7 @@ coverage_models <- function(data_name, n_way, n_imputations){
   # return: 
   # 
   models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'GAIN_CAT', 'DP', 'PROBIT')
-  
+  #models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'GAIN_DIFF', 'GAIN_CAT', 'GAIN_CAT_DIFF', 'DP', 'PROBIT')
   # output
   COVERAGE = list()
   
