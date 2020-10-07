@@ -36,7 +36,8 @@ compute_coverage <- function(model_name, data_name, n_way, n_imputations){
   Q = matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE)
   coverage = apply((lower_bound<=Q) & (Q<=upper_bound), MARGIN = 2, FUN = mean)
   print(paste('>> finish computing coverage - model:', model_name,', dataset:', data_name,', n way:', n_way))
-  
+  # print(quantile(upper_bound-lower_bound,na.rm = TRUE, probs = c(0.25, 0.5, 0.75)))
+  # print(mean(upper_bound-lower_bound,na.rm = TRUE))
   # remove column where TRUE_Q = 0
   indicator = TRUE_Q !=0
   return(coverage[indicator])

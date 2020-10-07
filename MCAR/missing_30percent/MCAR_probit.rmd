@@ -68,7 +68,10 @@ df_observed <- make_MCAR(df, missing_prob)
 
 ```{r, echo = TRUE, results='hide'}
 source('../../utils/models/PROBIT_imputation.R')
-imputation_list = PROBIT_imputation(df_observed, 5)
+start_time <- Sys.time()
+imputation_list = PROBIT_imputation(df_observed, 10)
+end_time <- Sys.time()
+end_time - start_time
 ```
 
 Diagnostics

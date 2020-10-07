@@ -69,7 +69,10 @@ apply(is.na(df_observed), MARGIN = 2, mean)
 ### MICE
 ```{r}
 source('../../utils/models/MICE_NOM_imputation.R')
-imputation_list = MICE_NOM_imputation(df_observed, 5)
+start_time <- Sys.time()
+imputation_list = MICE_NOM_imputation(df_observed, 10)
+end_time <- Sys.time()
+end_time - start_time
 ```
 
 

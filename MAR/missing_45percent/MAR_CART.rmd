@@ -51,6 +51,7 @@ library(coda)
 ```
 
 * * *
+
 ```{r}
 # sample MCAR dataset from PUMS
 source("../../utils/sampleMAR45.R")

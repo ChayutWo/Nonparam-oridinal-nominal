@@ -1,0 +1,232 @@
+
+---
+title: "PMF of each ordinal variable"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+# The very first time you use this R markdown file, you should install each of the packages below.
+# The same goes for other packages you might decide to use
+# Remember that you only need to install each R package once in R (ever -- unless you change computers).
+# All you need to do whenever you need to use the package again (after restarting the R session),
+# is to use the library function to call the package.
+# For example, type install.packages("knitr") in the console to install the knitr package. 
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(arm)
+library(pROC)
+library(tidyverse)
+library(MASS)
+library(tigerstats)
+library(leaps)
+library(car)
+library(rms)
+require(caret)
+require(e1071)
+library(lme4) 
+library(lattice)
+library(broom)
+library(boot)
+library(ggplot2)
+library(cobalt)
+require(tidyverse)
+require(rstanarm)
+require(magrittr)
+require(rstan)
+require(MCMCpack)
+library(abind)
+library(matrixStats)
+library(truncnorm)
+library(mvtnorm)
+library(MCMCpack)
+library(mnormt)
+library(coda)
+```
+
+* * *
+```{r, echo = FALSE}
+load('../../Datasets/ordinalPUMS.Rdata')
+n <- dim(df)[1]
+```
+
+### VEH: Vehicles available
+1: No vehicles  
+2: 1 vehicle  
+3: 2 vehicles  
+4: 3 vehicles  
+5: 4 vehicles  
+6: 5 vehicles  
+7: 6 or more vehicles  
+
+```{r, echo = FALSE}
+# VEH: Vehicles
+barplot(table(df$VEH)/n, main = 'VEH: Vehicles', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### MV: When move into house
+1: 12 months or less  
+2: 13 to 23 months  
+3: 2 to 4 years  
+4: 5 to 9 years  
+5: 10 to 19 years  
+6: 20 to 29 years  
+7: 30 years or more  
+
+```{r, echo = FALSE}
+# MV: When move into house
+barplot(summary(df$MV)/n, main = 'MV: When move into house', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### NP: Number of persons in this household
+1: 1 person  
+2: 2 persons  
+3: 3 persons  
+4: 4 persons  
+5: 5 persons  
+6: 6 persons  
+7: 7 or more persons  
+
+```{r, echo = FALSE}
+# NP: Number of persons in this household
+barplot(summary(df$NP)/n, main = 'NP: Number of persons in this household', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### RMSP: Number of rooms
+1 to 19 Number of rooms
+
+```{r, echo = FALSE}
+# RMSP: Number of rooms
+barplot(summary(df$RMSP)/n, main = 'RMSP: Number of rooms', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### ENG: Ability to speak english 
+1: Not at all  
+2: Not well  
+3: Well  
+4: Very well  
+5: Speak only english  
+
+```{r, echo = FALSE}
+# ENG: Ability to speak english 
+barplot(summary(df$ENG)/n, main = 'ENG: Ability to speak english', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### MARHT: Number of times married
+1: Never married  
+2: One time  
+3: Two times  
+4: Three or more times  
+
+```{r, echo = FALSE}
+# MARHT: Number of times married 
+barplot(summary(df$MARHT)/n, main = 'MARHT: Number of times married', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### SCHL: Educational attainment
+1: No schooling complted  
+2: Less than 12th grade  
+3: High school, GED or college with no degree
+4: Associate's degree  
+5: Bachelor's degree  
+6: Master's or other professional degree beyond bachelor's degree  
+7: Doctorate degree  
+
+```{r, echo = FALSE}
+# SCHL: Educational attainment
+barplot(summary(df$SCHL)/n, main = 'SCHL: Educational attainment', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### RACNUM: Number of major race groups represented
+1: One race group
+2: Two or more race groups
+
+```{r, echo = FALSE}
+# RACNUM: Number of major race groups represented
+barplot(summary(df$RACNUM)/n, main = 'RACNUM: Number of major race groups represented', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### AGEP: Age
+1: 15 to 19 years old  
+2: 19 to 24 years old  
+3: 25 to 29 years old  
+4: 30 to 34 years old  
+5: 35 to 39 years old  
+6: 40 to 44 years old  
+7: 45 to 49 years old  
+8: 50 to 54 years old  
+9: 55 to 59 years old  
+10: 60 to 64 years old  
+11: 65 to 69 years old  
+12: 70 to 74 years old  
+13: 75 to 79 years old  
+14: 80 to 84 years old  
+15: 85 to 89 years old  
+16: 90 to 94 years old  
+17: 94 to 99 years old  
+
+```{r, echo = FALSE}
+# AGEP: Age
+barplot(summary(df$AGEP)/n, main = 'AGEP: Age', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### WKL: When last worked
+1: Over 5 years ago or never worked  
+2: 1-5 years ago  
+3: Within the past 12 months  
+
+```{r, echo = FALSE}
+# WKL: When last worked
+barplot(summary(df$WKL)/n, main = 'WKL: When last worked', xlab = 'level', ylab = 'pmf')
+```
+
+\newpage
+
+### PINCP: Total person's income
+1: Negative income  
+2: None  
+3: \$1 to \$20000  
+4: \$20001 to \$40000   
+5: \$40001 to \$60000   
+6: \$60001 to \$80000   
+7: \$80001 to \$100000   
+8: \$100001 to \$120000   
+9: \$120001 to \$140000   
+10: \$140001 to \$160000   
+11: \$160001 to \$180000   
+12: \$180001 to \$200000   
+13: More than \$200000  
+
+```{r, echo = FALSE}
+# PINCP: Total person's income
+barplot(summary(df$PINCP)/n, main = 'PINCP: Total person income', xlab = 'level', ylab = 'pmf')
+```
+
+* * *
+
+
+

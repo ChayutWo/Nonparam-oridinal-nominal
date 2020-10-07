@@ -37,7 +37,7 @@ rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
 xtable(summary, caption = 'Distribution of bias for different imputation methods for data with 45% values MAR (Marginal probabilities)', digits = 3)
 ```
 
-```{r, fig.width=5, fig.height = 3}
+```{r, fig.width=5, fig.height = 2.5}
 # boxplot for estimates for marginal distribution
 boxplot(df, col = 'light blue', xlab = 'Imputation method', 
         ylab = 'Bias', ylim = c(-0.05, 0.05),
