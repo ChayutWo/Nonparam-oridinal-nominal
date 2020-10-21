@@ -67,7 +67,7 @@ n <- dim(df)[1]
 
 ```{r, echo = FALSE}
 # VEH: Vehicles
-barplot(table(df$VEH)/n, main = 'VEH: Vehicles', xlab = 'level', ylab = 'pmf')
+barplot(table(df$VEH)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -83,7 +83,7 @@ barplot(table(df$VEH)/n, main = 'VEH: Vehicles', xlab = 'level', ylab = 'pmf')
 
 ```{r, echo = FALSE}
 # MV: When move into house
-barplot(summary(df$MV)/n, main = 'MV: When move into house', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$MV)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -99,7 +99,7 @@ barplot(summary(df$MV)/n, main = 'MV: When move into house', xlab = 'level', yla
 
 ```{r, echo = FALSE}
 # NP: Number of persons in this household
-barplot(summary(df$NP)/n, main = 'NP: Number of persons in this household', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$NP)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -109,7 +109,7 @@ barplot(summary(df$NP)/n, main = 'NP: Number of persons in this household', xlab
 
 ```{r, echo = FALSE}
 # RMSP: Number of rooms
-barplot(summary(df$RMSP)/n, main = 'RMSP: Number of rooms', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$RMSP)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -123,7 +123,7 @@ barplot(summary(df$RMSP)/n, main = 'RMSP: Number of rooms', xlab = 'level', ylab
 
 ```{r, echo = FALSE}
 # ENG: Ability to speak english 
-barplot(summary(df$ENG)/n, main = 'ENG: Ability to speak english', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$ENG)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -136,7 +136,7 @@ barplot(summary(df$ENG)/n, main = 'ENG: Ability to speak english', xlab = 'level
 
 ```{r, echo = FALSE}
 # MARHT: Number of times married 
-barplot(summary(df$MARHT)/n, main = 'MARHT: Number of times married', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$MARHT)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -152,7 +152,7 @@ barplot(summary(df$MARHT)/n, main = 'MARHT: Number of times married', xlab = 'le
 
 ```{r, echo = FALSE}
 # SCHL: Educational attainment
-barplot(summary(df$SCHL)/n, main = 'SCHL: Educational attainment', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$SCHL)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -163,7 +163,7 @@ barplot(summary(df$SCHL)/n, main = 'SCHL: Educational attainment', xlab = 'level
 
 ```{r, echo = FALSE}
 # RACNUM: Number of major race groups represented
-barplot(summary(df$RACNUM)/n, main = 'RACNUM: Number of major race groups represented', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$RACNUM)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -189,7 +189,7 @@ barplot(summary(df$RACNUM)/n, main = 'RACNUM: Number of major race groups repres
 
 ```{r, echo = FALSE}
 # AGEP: Age
-barplot(summary(df$AGEP)/n, main = 'AGEP: Age', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$AGEP)/n,  xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -201,7 +201,7 @@ barplot(summary(df$AGEP)/n, main = 'AGEP: Age', xlab = 'level', ylab = 'pmf')
 
 ```{r, echo = FALSE}
 # WKL: When last worked
-barplot(summary(df$WKL)/n, main = 'WKL: When last worked', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$WKL)/n,  xlab = 'level', ylab = 'pmf')
 ```
 
 \newpage
@@ -223,7 +223,7 @@ barplot(summary(df$WKL)/n, main = 'WKL: When last worked', xlab = 'level', ylab 
 
 ```{r, echo = FALSE}
 # PINCP: Total person's income
-barplot(summary(df$PINCP)/n, main = 'PINCP: Total person income', xlab = 'level', ylab = 'pmf')
+barplot(summary(df$PINCP)/n, xlab = 'level', ylab = 'pmf')
 ```
 
 * * *

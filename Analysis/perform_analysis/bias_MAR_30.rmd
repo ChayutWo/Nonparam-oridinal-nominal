@@ -40,8 +40,8 @@ xtable(summary, caption = 'Distribution of bias for different imputation methods
 
 ```{r, fig.width=5, fig.height = 2.5}
 # boxplot for estimates for marginal distribution
-boxplot(df, col = 'light blue', xlab = 'Imputation method', 
-        ylab = 'Bias', ylim = c(-0.05, 0.05),
+boxplot(df[, c(1,2,3,4,7,8)], col = 'light blue', xlab = 'Imputation method', 
+        ylab = 'Bias', ylim = c(-0.03, 0.03),
         main = 'Bias from different imputation methods: Marginal pmf')
 ```
 
