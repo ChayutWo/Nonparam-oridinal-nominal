@@ -17,27 +17,27 @@ root_MAR_30 = 'MAR_30/MAR_30_'
 root_MAR_45 = 'MAR_45/MAR_45_'
 
 # define simulation hyper parameter
-n_imputations = 10
-max_nway = 4
+n_imputations = 50
+max_nway = 3
 
-if (repindex <= 100) {
-  # repindex 1 - 100: MCAR_30 dataset
+if (repindex <= 500) {
+  # repindex 1 - 500: MCAR_30 dataset
   i = repindex
   data_name = paste(root_fully_observed, i, sep='')
   missing_data_name = paste(root_MCAR_30, i, sep = '')
-}else if (repindex <= 200) {
-  # repindex 101-200: MCAR_45 dataset
-  i = repindex - 100
+}else if (repindex <= 1000) {
+  # repindex 501-1000: MCAR_45 dataset
+  i = repindex - 500
   data_name = paste(root_fully_observed, i, sep='')
   missing_data_name = paste(root_MCAR_45, i, sep = '')
-}else if (repindex <= 300) {
-  # repindex 201-300: MAR_30 dataset
-  i = repindex - 200
+}else if (repindex <= 1500) {
+  # repindex 1001-1500: MAR_30 dataset
+  i = repindex - 1000
   data_name = paste(root_fully_observed, i, sep='')
   missing_data_name = paste(root_MAR_30, i, sep = '')
-}else if (repindex <= 400) {
-  # repindex 301-400: MAR_45 dataset
-  i = repindex - 300
+}else if (repindex <= 2000) {
+  # repindex 1500-2000: MAR_45 dataset
+  i = repindex - 1500
   data_name = paste(root_fully_observed, i, sep='')
   missing_data_name = paste(root_MAR_45, i, sep = '')
 }

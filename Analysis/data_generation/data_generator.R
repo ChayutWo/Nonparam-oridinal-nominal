@@ -1,5 +1,5 @@
-# This code generate 100 subsample of the PUMS original data each with 10000 observations
-# It then made each of those 100 dataset missing according to 4 missing mechanism
+# This code generate 500 subsample of the PUMS original data each with 10000 observations
+# It then made each of those 500 dataset missing according to 4 missing mechanism
 library(MASS)
 library(tidyverse)
 
@@ -13,7 +13,7 @@ source("../../utils/make_MAR_45.R")
 n <- 10000
 missing_col <- c(1,3,7,9,10,11)
 set.seed(0)
-
+replicates = 500
 # Root for different dataset
 root_fully_observed <- '../../Datasets/fully_observed/fully_observed_'
 root_MCAR_30 <- '../../Datasets/MCAR_30/MCAR_30_'
@@ -21,7 +21,7 @@ root_MCAR_45 <- '../../Datasets/MCAR_45/MCAR_45_'
 root_MAR_30 <- '../../Datasets/MAR_30/MAR_30_'
 root_MAR_45 <- '../../Datasets/MAR_45/MAR_45_'
 
-for (i in 1:100) {
+for (i in 1:replicates) {
   # Generate a full set of fully observed and missing dataframes
   df <- sample_PUMS(n)
   df_MCAR_30 <- make_MCAR(df, 0.3)
