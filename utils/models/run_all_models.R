@@ -71,8 +71,8 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   #cat(paste('>> complete GAIN_CAT_DIFF imputation on',missing_data_name, Sys.time(),'\n'))
   #print(paste('GAIN_CAT_DIFF',length(imputation_list)))
   ##### run PROBIT #####
-  imputation_list = PROBIT_imputation(df_observed, n_imputations)
-  cal_save_stat(imputation_list, 'PROBIT', missing_data_name, max_nway)
-  cat(paste('>> complete PROBIT imputation on',missing_data_name, Sys.time(),'\n'))
-  print(paste('PROBIT',length(imputation_list)))
+  #imputation_list = PROBIT_imputation(df_observed, n_imputations)
+  #cal_save_stat(imputation_list, 'PROBIT', missing_data_name, max_nway)
+  #cat(paste('>> complete PROBIT imputation on',missing_data_name, Sys.time(),'\n'))
+  #print(paste('PROBIT',length(imputation_list)))
 }
