@@ -46,10 +46,10 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   #cat(paste('>> complete FOREST imputation on',missing_data_name, Sys.time(),'\n'))
   #print(paste('FOREST',length(imputation_list)))
   ##### run DP #####
-  #imputation_list = DP_imputation(df_observed, n_imputations)
-  #cal_save_stat(imputation_list, 'DP', missing_data_name, max_nway)
-  #cat(paste('>> complete DP imputation on',missing_data_name, Sys.time(),'\n'))
-  #print(paste('DP',length(imputation_list)))
+  imputation_list = DP_imputation(df_observed, n_imputations)
+  cal_save_stat(imputation_list, 'DP', missing_data_name, max_nway)
+  cat(paste('>> complete DP imputation on',missing_data_name, Sys.time(),'\n'))
+  print(paste('DP',length(imputation_list)))
   ##### run GAIN #####
   #imputation_list = GAIN_imputation(data_name, missing_data_name, n_imputations, df_observed)
   #cal_save_stat(imputation_list, 'GAIN', missing_data_name, max_nway)
