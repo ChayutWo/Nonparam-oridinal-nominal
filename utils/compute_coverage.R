@@ -10,7 +10,7 @@ compute_coverage <- function(model_name, data_name, n_way, n_imputations){
 
   # return: coverage
   # an array of coverage in fraction for each of the pmf
-  
+  n_replicates = 500
   # get true pmf
   TRUE_Q = get_true_pmf(n_way)
   # load result
@@ -33,7 +33,7 @@ compute_coverage <- function(model_name, data_name, n_way, n_imputations){
   rm(q_bar, total_sd, q_alpha)
   
   # calculate coverage 0/1 and return the mean of each pmf
-  Q = matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE)
+  Q = matrix(rep(TRUE_Q, n_replicates), nrow = n_replicates, byrow = TRUE)
   coverage = apply((lower_bound<=Q) & (Q<=upper_bound), MARGIN = 2, FUN = mean)
   print(paste('>> finish computing coverage - model:', model_name,', dataset:', data_name,', n way:', n_way))
   # print(quantile(upper_bound-lower_bound,na.rm = TRUE, probs = c(0.25, 0.5, 0.75)))

@@ -10,6 +10,7 @@ load_result <- function(model_name, data_name, n_way){
   
   
   # matrix for storing output data
+  n_replicates = 500
   # degree of freedom
   DOF = c()
   # mean estimate
@@ -20,8 +21,8 @@ load_result <- function(model_name, data_name, n_way){
   B = c()
   
   savepath = paste('../../Results/',model_name,'/',data_name,'/', sep = '')
-  for (i in 1:100) {
-    # loop over dataset 1:100
+  for (i in 1:n_replicates) {
+    # loop over dataset 1:n_replicates
     root = paste(savepath, data_name, '_', i, sep = '')
     dof_name = paste(root, '_dof_', n_way, 'way.csv', sep = '')
     q_bar_name = paste(root, '_q_bar_', n_way, 'way.csv', sep = '')

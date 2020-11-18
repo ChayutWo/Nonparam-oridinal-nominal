@@ -12,14 +12,14 @@ compute_rel_MSE <- function(model_name, data_name, n_way, TRUE_Q, OBSERVED_Q){
   
   # return: rel_MSE
   # an array of relative MSE in fraction for each of the pmf
-
+  n_replicates = 500
   # load result
   output_list = load_result(model_name, data_name, n_way)
   q_bar = output_list[['q_bar']] # mean estimate
   rm(output_list)
   
   # compute the numerator and denominator part of the relative MSE
-  Q = matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE)
+  Q = matrix(rep(TRUE_Q, n_replicates), nrow = n_replicates, byrow = TRUE)
   imputed_MSE = apply((q_bar - Q)^2, MARGIN = 2, FUN = sum)
   observed_MSE = apply((OBSERVED_Q - Q)^2, MARGIN = 2, FUN = sum)
   rel_MSE = imputed_MSE/observed_MSE

@@ -22,7 +22,7 @@ library(xtable)
 ```{r}
 source("../../utils/compute_coverage.R")
 data_name = 'MCAR_45'
-n_imputations = 10
+n_imputations = 50
 ```
 
 ```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}

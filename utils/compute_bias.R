@@ -10,7 +10,7 @@ compute_bias <- function(model_name, data_name, n_way, TRUE_Q){
   
   # return: bias
   # an array of bias for each of the pmf estimate (E[q]-Q)
-  
+  n_replicates = 500
   # get mean estimate from imputed dataset
   output_list = load_result(model_name, data_name, n_way)
   q_bar = output_list[['q_bar']] # mean estimate
@@ -18,7 +18,7 @@ compute_bias <- function(model_name, data_name, n_way, TRUE_Q){
   
 
   # compute the numerator and denominator part of the relative MSE
-  Q = (matrix(rep(TRUE_Q, 100), nrow = 100, byrow = TRUE))
+  Q = (matrix(rep(TRUE_Q, n_replicates), nrow = n_replicates, byrow = TRUE))
   bias = apply(q_bar-Q, MARGIN = 2, FUN = mean)
   print(paste('>> finish computing bias - model:', model_name,', dataset:', data_name,', n way:', n_way))
   
