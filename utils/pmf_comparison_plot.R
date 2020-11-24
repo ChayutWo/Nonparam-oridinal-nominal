@@ -47,16 +47,16 @@ pmf_comparison_plot <- function(data_name,n_way){
   }
   
   if (n_way==1) {
-    title_name = 'Comparison of imputed pmf and population pmf: Marginal distribution'
+    #title_name = 'Comparison of imputed pmf and population pmf: Marginal distribution'
   }else if (n_way==2) {
-    title_name = 'Comparison of imputed pmf and population pmf: Bivariate distribution'
+    #title_name = 'Comparison of imputed pmf and population pmf: Bivariate distribution'
   }else if (n_way == 3){
-    title_name = 'Comparison of imputed pmf and population pmf: Trivariate distribution'
+    #title_name = 'Comparison of imputed pmf and population pmf: Trivariate distribution'
   }
   title(xlab = "Average imputed pmf",
         ylab = "Population pmf",
         outer = TRUE, line = 3)
-  mtext(title_name, side = 3, line = 1.5, outer = TRUE, cex = 1.2)
+  #mtext(title_name, side = 3, line = 1.5, outer = TRUE, cex = 1.2)
 }
 
 pmf_comparison_plot_noGAIN <- function(data_name,n_way){

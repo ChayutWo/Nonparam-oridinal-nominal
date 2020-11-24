@@ -23,7 +23,6 @@ compute_rel_MSE <- function(model_name, data_name, n_way, TRUE_Q, OBSERVED_Q){
   imputed_MSE = apply((q_bar - Q)^2, MARGIN = 2, FUN = sum)
   observed_MSE = apply((OBSERVED_Q - Q)^2, MARGIN = 2, FUN = sum)
   rel_MSE = imputed_MSE/observed_MSE
-  
   print(paste('>> finish computing relative MSE - model:', model_name,', dataset:', data_name,', n way:', n_way))
   
   # remove column where TRUE_Q = 0

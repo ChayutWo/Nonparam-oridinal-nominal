@@ -33,7 +33,7 @@ df = format_list(rel_MSE)
 ```
 
 ```{r}
-summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
+summary = apply(df[,c(1,2,3,4,7,8)], MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
 rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
 xtable(summary, caption = 'Distribution of relative MSE for different imputation methods for data with 45% values MAR (Marginal probabilities)', digits = 1)
 ```
@@ -52,7 +52,7 @@ df = format_list(rel_MSE)
 
 
 ```{r}
-summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
+summary = apply(df[,c(1,2,3,4,7,8)], MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1))
 rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
 xtable(summary, caption = 'Distribution of relative MSE for different imputation methods for data with 45% values MAR (Bivariate probabilities)', digits = 1)
 ```

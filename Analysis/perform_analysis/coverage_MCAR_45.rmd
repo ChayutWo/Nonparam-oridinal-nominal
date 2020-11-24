@@ -59,6 +59,8 @@ xtable(summary, caption = 'Distribution of coverage for different imputation met
 ```
 
 ```{r, fig.width=5, fig.height = 3}
+setEPS()
+postscript("../figures/coverage_12way_MCAR_45.eps", width=11, height=6, horizontal = FALSE, onefile=FALSE)
 par(mfrow=c(1,2), oma = c(5.5,4.5,0.2,0.2) + 0.1, mar = c(0.25,0.25,1.25,1.25) + 0.1)
 boxplot(df_1way, col = 'light blue', ylim = c(0,1), main = paste('Marginal'),
         las = 2)
@@ -67,6 +69,7 @@ boxplot(df_2way, col = 'peachpuff', ylim = c(0,1), main = paste('Bivariate'),
 axis(2, labels=FALSE)
 title(ylab = "Coverage (fraction)",
       outer = TRUE, line = 3)
+dev.off()
 ```
 
 

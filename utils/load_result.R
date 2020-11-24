@@ -11,14 +11,22 @@ load_result <- function(model_name, data_name, n_way){
   
   # matrix for storing output data
   n_replicates = 500
+  
+  if (n_way == 1) {
+    size = 54
+  }else if(n_way == 2){
+    size = 3149
+  }else if(n_way == 3){
+    size = 79653
+  }
   # degree of freedom
-  DOF = c()
+  DOF = matrix(NA, nrow = n_replicates, ncol = size)
   # mean estimate
-  Q_BAR = c() 
+  Q_BAR = matrix(NA, nrow = n_replicates, ncol = size)
   # within group variance
-  U_BAR = c()
+  U_BAR = matrix(NA, nrow = n_replicates, ncol = size)
   # between group variance
-  B = c()
+  B = matrix(NA, nrow = n_replicates, ncol = size)
   
   savepath = paste('../../Results/',model_name,'/',data_name,'/', sep = '')
   for (i in 1:n_replicates) {
@@ -34,10 +42,10 @@ load_result <- function(model_name, data_name, n_way){
     u_bar = read_csv(u_bar_name)
     b = read_csv(b_name)
     # collect results within matrix
-    DOF = rbind(DOF, t(dof))
-    Q_BAR = rbind(Q_BAR, t(q_bar))
-    U_BAR = rbind(U_BAR, t(u_bar))
-    B = rbind(B, t(b))
+    DOF[i,] = t(dof)
+    Q_BAR[i,] = t(q_bar)
+    U_BAR[i,] = t(u_bar)
+    B[i,] = t(b)
   }
   output_list = list(Q_BAR, U_BAR, B, DOF)
   names(output_list) = c('q_bar', 'u_bar', 'b', 'dof')

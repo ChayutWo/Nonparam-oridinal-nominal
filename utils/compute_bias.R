@@ -21,7 +21,6 @@ compute_bias <- function(model_name, data_name, n_way, TRUE_Q){
   Q = (matrix(rep(TRUE_Q, n_replicates), nrow = n_replicates, byrow = TRUE))
   bias = apply(q_bar-Q, MARGIN = 2, FUN = mean)
   print(paste('>> finish computing bias - model:', model_name,', dataset:', data_name,', n way:', n_way))
-  
   # remove column where TRUE_Q = 0
   indicator = TRUE_Q !=0
   return(bias[indicator])

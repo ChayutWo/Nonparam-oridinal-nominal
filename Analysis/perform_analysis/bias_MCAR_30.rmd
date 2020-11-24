@@ -39,9 +39,11 @@ xtable(summary, caption = 'Distribution of bias for different imputation methods
 
 ```{r, fig.width=5, fig.height = 2.5}
 # boxplot for estimates for marginal distribution
+setEPS()
+postscript("../figures/bias_MCAR_30.eps", width=10, height=5, horizontal = FALSE, onefile=FALSE)
 boxplot(df, col = 'light blue', xlab = 'Imputation method', 
-        ylab = 'Bias', ylim = c(-0.05, 0.05),
-        main = 'Bias from different imputation methods: Marginal pmf')
+        ylab = 'Bias', ylim = c(-0.05, 0.05))
+dev.off()
 ```
 
 ```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}

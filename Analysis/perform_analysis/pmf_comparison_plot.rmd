@@ -25,11 +25,13 @@ source("../../utils/pmf_comparison_plot.R")
 
 ```{r, fig.width=15/4, fig.height = 3, warning = FALSE, message=FALSE}
 # generate image with high resolution
+setEPS()
 data_name = 'MAR_30'
-jpeg(filename="compare_marginal_MAR_30.jpeg", width=7.5, height=6, units="in", res=300, quality = 100)
+postscript("../figures/compare_marginal_MAR_30.eps", width=7.5, height=6, horizontal = FALSE, onefile=FALSE)
 pmf_comparison_plot_noGAIN(data_name, n_way = 1)
 dev.off()
-jpeg(filename="compare_bi_MAR_30.jpeg", width=7.5, height=6, units="in", res=300, quality = 100)
+
+postscript("../figures/compare_bi_MAR_30.eps", width=7.5, height=6, horizontal = FALSE, onefile=FALSE)
 pmf_comparison_plot_noGAIN(data_name, n_way = 2)
 dev.off()
 ```
@@ -40,28 +42,38 @@ pmf_comparison_plot_noGAIN(data_name, n_way = 1)
 pmf_comparison_plot_noGAIN(data_name, n_way = 2)
 ```
 
-```{r, fig.width=5, fig.height = 3, warning = FALSE, message=FALSE}
-data_name = 'MAR_30'
-pmf_comparison_plot(data_name, n_way = 1)
-pmf_comparison_plot(data_name, n_way = 2)
-```
 
 ```{r, fig.width=5, fig.height = 3, warning = FALSE, message=FALSE}
 data_name = 'MAR_45'
+setEPS()
+postscript("../figures/compare_marginal_MAR_45.eps", width=10, height=6, horizontal = FALSE, onefile=FALSE)
 pmf_comparison_plot(data_name, n_way = 1)
+dev.off()
+postscript("../figures/compare_bi_MAR_45.eps", width=10, height=6, horizontal = FALSE, onefile=FALSE)
 pmf_comparison_plot(data_name, n_way = 2)
+dev.off()
 ```
 
 ```{r, fig.width=5, fig.height = 3, warning = FALSE, message=FALSE}
 data_name = 'MCAR_30'
+setEPS()
+postscript("../figures/compare_marginal_MCAR_30.eps", width=10, height=6, horizontal = FALSE, onefile=FALSE)
 pmf_comparison_plot(data_name, n_way = 1)
+dev.off()
+postscript("../figures/compare_bi_MCAR_30.eps", width=10, height=6, horizontal = FALSE, onefile=FALSE)
 pmf_comparison_plot(data_name, n_way = 2)
+dev.off()
 ```
 
 ```{r, fig.width=5, fig.height = 3, warning = FALSE, message=FALSE}
 data_name = 'MCAR_45'
+setEPS()
+postscript("../figures/compare_marginal_MCAR_45.eps", width=10, height=6, horizontal = FALSE, onefile=FALSE)
 pmf_comparison_plot(data_name, n_way = 1)
+dev.off()
+postscript("../figures/compare_bi_MCAR_45.eps", width=10, height=6, horizontal = FALSE, onefile=FALSE)
 pmf_comparison_plot(data_name, n_way = 2)
+dev.off()
 ```
 
 * * *
