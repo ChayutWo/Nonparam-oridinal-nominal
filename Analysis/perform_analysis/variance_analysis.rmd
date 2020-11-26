@@ -1,0 +1,56 @@
+
+---
+title: "Coverage analysis: MAR_30"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(readr)
+library(xtable)
+```
+
+* * *
+
+```{r}
+source("../../utils/compute_coverage.R")
+data_name = 'MAR_30'
+n_imputations = 50
+```
+
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 1
+coverage = coverage_models(data_name, n_way, n_imputations)
+df = format_list(coverage)
+df_2way = df
+```
+
+
+```{r}
+TRUE_Q = get_true_pmf(n_way)
+indicator = TRUE_Q !=0
+Q = TRUE_Q[indicator]
+```
+
+```{r}
+plot(Q, df_2way[, 1], ylab = 'coverage', xlab = 'prob', ylim= c(0,1))
+title('MI-Polyreg')
+```
+
+```{r}
+plot(Q, df_2way[, 2], ylab = 'coverage', xlab = 'prob', ylim= c(0,1))
+title('MI-Polr')
+```
+
+* * *
+
+
+
