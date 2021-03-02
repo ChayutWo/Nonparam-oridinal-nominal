@@ -16,6 +16,7 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   source('../../utils/models/GAIN_CAT_DIFF_imputation.R')
   source('../../utils/models/GAIN_DIFF_imputation.R')
   source('../../utils/models/PROBIT_imputation.R')
+  source('../../utils/models/MICE_RF_imputation.R')
   # source other utils code
   source('../../utils/load_data.R')
   source("../../utils/calculate_statistics.R")
@@ -26,25 +27,30 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   cat(paste('>> complete loading data', Sys.time(),'\n'))
   
   ##### run MICE #####
-  imputation_list = MICE_imputation(df_observed, n_imputations)
-  cal_save_stat(imputation_list, 'MICE', missing_data_name, max_nway)
-  cat(paste('>> complete MICE imputation on',missing_data_name, Sys.time(),'\n'))
-  print(paste('MICE',length(imputation_list)))
+  #imputation_list = MICE_imputation(df_observed, n_imputations)
+  #cal_save_stat(imputation_list, 'MICE', missing_data_name, max_nway)
+  #cat(paste('>> complete MICE imputation on',missing_data_name, Sys.time(),'\n'))
+  #print(paste('MICE',length(imputation_list)))
   ##### run MICE_NOM #####
-  imputation_list = MICE_NOM_imputation(df_observed, n_imputations)
-  cal_save_stat(imputation_list, 'MICE_NOM', missing_data_name, max_nway)
-  cat(paste('>> complete MICE_NOM imputation on',missing_data_name, Sys.time(),'\n'))
-  print(paste('MICE_NOM',length(imputation_list)))
+  #imputation_list = MICE_NOM_imputation(df_observed, n_imputations)
+  #cal_save_stat(imputation_list, 'MICE_NOM', missing_data_name, max_nway)
+  #cat(paste('>> complete MICE_NOM imputation on',missing_data_name, Sys.time(),'\n'))
+  #print(paste('MICE_NOM',length(imputation_list)))
   ##### run CART #####
-  imputation_list = CART_imputation(df_observed, n_imputations)
-  cal_save_stat(imputation_list, 'CART', missing_data_name, max_nway)
-  cat(paste('>> complete CART imputation on',missing_data_name, Sys.time(),'\n'))
-  print(paste('CART',length(imputation_list)))
-  ##### run FOREST #####
-  imputation_list = FOREST_imputation(df_observed, n_imputations)
-  cal_save_stat(imputation_list, 'FOREST', missing_data_name, max_nway)
-  cat(paste('>> complete FOREST imputation on',missing_data_name, Sys.time(),'\n'))
-  print(paste('FOREST',length(imputation_list)))
+  #imputation_list = CART_imputation(df_observed, n_imputations)
+  #cal_save_stat(imputation_list, 'CART', missing_data_name, max_nway)
+  #cat(paste('>> complete CART imputation on',missing_data_name, Sys.time(),'\n'))
+  #print(paste('CART',length(imputation_list)))
+  ##### run RF #####
+  imputation_list = MICE_RF_imputation(df_observed, n_imputations)
+  cal_save_stat(imputation_list, 'MICE_RF', missing_data_name, max_nway)
+  cat(paste('>> complete RF imputation on',missing_data_name, Sys.time(),'\n'))
+  print(paste('RF',length(imputation_list)))
+  ##### run missForest #####
+  #imputation_list = FOREST_imputation(df_observed, n_imputations)
+  #cal_save_stat(imputation_list, 'FOREST', missing_data_name, max_nway)
+  #cat(paste('>> complete FOREST imputation on',missing_data_name, Sys.time(),'\n'))
+  #print(paste('FOREST',length(imputation_list)))
   ##### run DP #####
   #imputation_list = DP_imputation(df_observed, n_imputations)
   #cal_save_stat(imputation_list, 'DP', missing_data_name, max_nway)
