@@ -6,16 +6,16 @@ run_all_models <- function(data_name, missing_data_name, n_imputations, max_nway
   # max_nway: maximum number of ways in joint distribution calculation
   
   # source all model codes
-  source('../../utils/models/MICE_imputation.R')
-  source('../../utils/models/MICE_NOM_imputation.R')
-  source('../../utils/models/CART_imputation.R')
-  source('../../utils/models/FOREST_imputation.R')
-  source('../../utils/models/DP_imputation.R')
-  source('../../utils/models/GAIN_imputation.R')
-  source('../../utils/models/GAIN_CAT_imputation.R')
-  source('../../utils/models/GAIN_CAT_DIFF_imputation.R')
-  source('../../utils/models/GAIN_DIFF_imputation.R')
-  source('../../utils/models/PROBIT_imputation.R')
+  #source('../../utils/models/MICE_imputation.R')
+  #source('../../utils/models/MICE_NOM_imputation.R')
+  #source('../../utils/models/CART_imputation.R')
+  #source('../../utils/models/FOREST_imputation.R')
+  #source('../../utils/models/DP_imputation.R')
+  #source('../../utils/models/GAIN_imputation.R')
+  #source('../../utils/models/GAIN_CAT_imputation.R')
+  #source('../../utils/models/GAIN_CAT_DIFF_imputation.R')
+  #source('../../utils/models/GAIN_DIFF_imputation.R')
+  #source('../../utils/models/PROBIT_imputation.R')
   source('../../utils/models/MICE_RF_imputation.R')
   # source other utils code
   source('../../utils/load_data.R')
