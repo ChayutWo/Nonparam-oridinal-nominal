@@ -22,7 +22,9 @@ compute_bias <- function(model_name, data_name, n_way, TRUE_Q){
   bias = apply(q_bar-Q, MARGIN = 2, FUN = mean)
   print(paste('>> finish computing bias - model:', model_name,', dataset:', data_name,', n way:', n_way))
   # remove column where TRUE_Q = 0
-  indicator = TRUE_Q !=0
+  indicator = (TRUE_Q !=0) & (TRUE_Q*10000>10) & ((1-TRUE_Q)*10000>10)
+  print(length(TRUE_Q))
+  print(length(bias))
   return(bias[indicator])
 }
 
@@ -33,7 +35,7 @@ bias_models <- function(data_name, n_way){
   
   # return: BIAS
   # a list of bias for each of the models
-  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'GAIN_CAT', 'DP', 'PROBIT')
+  models = c('MICE_NOM', 'MICE','CART', 'MICE_RF', 'FOREST', 'GAIN_CAT', 'DP', 'PROBIT')
   
   # get true pmf
   TRUE_Q = get_true_pmf(n_way)

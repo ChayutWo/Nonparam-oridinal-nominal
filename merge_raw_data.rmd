@@ -66,6 +66,10 @@ household <- household %>%
 # remove loaded data to save space
 rm(psam_husa,psam_husb)
 ```
+```{r}
+psam_pusa <- read.table('Datasets/csv_pus/psam_pusa.csv', sep = ',', header = TRUE)
+psam_pusb <- read.table('Datasets/csv_pus/psam_pusb.csv', sep = ',', header = TRUE)
+```
 
 ```{r}
 # Download raw personal level data

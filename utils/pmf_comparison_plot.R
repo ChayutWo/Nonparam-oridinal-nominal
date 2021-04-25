@@ -6,11 +6,13 @@ pmf_comparison_plot <- function(data_name,n_way){
   # n_way: the number of way in the joint probability to be considered
   
   # return: NULL
-  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'GAIN_CAT', 'DP', 'PROBIT')
-  report_name = c('MI-nom', 'MI-ord', 'MI-cart', 'Forest', 'GAIN', 'GAINcat', 'DPMPM', 'DPMMVN')
+  models = c('MICE_NOM', 'MICE','CART', 'MICE_RF', 'FOREST', 'GAIN_CAT', 'DP', 'PROBIT')
+  report_name = c('MI-Multireg', 'MI-Polr', 'MI-Cart', 'MI-Forest', 'missForest', 'GAIN', 
+                  'MI-DPMPM', 'MI-DPMMVN')
   # get true pmf
   true_pmf = get_true_pmf(n_way=n_way)
-  
+  indicator = (true_pmf !=0) & (true_pmf*10000>10) & ((1-true_pmf)*10000>10)
+  true_pmf = true_pmf[indicator]
   par(mfrow=c(2,4), oma = c(5.5,4.5,4,0.2) + 0.1, mar = c(0.25,0.25,1.25,1.25) + 0.1, 
       cex.axis = 1.75, cex.lab=1.75, cex.main = 1.5)
   for (i in 1:length(models)) {
@@ -21,6 +23,9 @@ pmf_comparison_plot <- function(data_name,n_way){
     
     # calculate imputed pmf
     imputed_pmf = apply(q_bar, MARGIN = 2, mean)
+    imputed_pmf = imputed_pmf[indicator]
+    print(length(imputed_pmf))
+    print(length(true_pmf))
     title = report_name[i]
     if (i==1) {
       # top left
@@ -42,8 +47,8 @@ pmf_comparison_plot <- function(data_name,n_way){
       axis(2, labels=FALSE)
     }
     abline(0,1, col = 'gray')
-    abline(0,1.1, col = 'red')
-    abline(0, 0.9, col = 'red')
+    #abline(0,1.1, col = 'red')
+    #abline(0, 0.9, col = 'red')
   }
   
   if (n_way==1) {
@@ -65,11 +70,12 @@ pmf_comparison_plot_noGAIN <- function(data_name,n_way){
   # n_way: the number of way in the joint probability to be considered
   
   # return: NULL
-  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'DP', 'PROBIT')
-  report_name = c('MI-nom', 'MI-ord', 'MI-cart', 'Forest', 'DPMPM', 'DPMMVN')
+  models = c('MICE_NOM', 'MICE','CART', 'MICE_RF', 'DP', 'PROBIT')
+  report_name = c('MI-Multireg', 'MI-Polr', 'MI-Cart', 'MI-Forest', 'MI-DPMPM', 'MI-DPMMVN')
   # get true pmf
   true_pmf = get_true_pmf(n_way=n_way)
-  
+  indicator = (true_pmf !=0) & (true_pmf*10000>10) & ((1-true_pmf)*10000>10)
+  true_pmf = true_pmf[indicator]
   par(mfrow=c(2,3), oma = c(5.5,4.5,4,0.2) + 0.1, mar = c(0.25,0.25,1.25,1.25) + 0.1, 
       cex.axis = 1.75, cex.lab=1.75, cex.main = 1.5)
   for (i in 1:length(models)) {
@@ -80,6 +86,7 @@ pmf_comparison_plot_noGAIN <- function(data_name,n_way){
     
     # calculate imputed pmf
     imputed_pmf = apply(q_bar, MARGIN = 2, mean)
+    imputed_pmf = imputed_pmf[indicator]
     title = report_name[i]
     if (i==1) {
       # top left
@@ -101,8 +108,8 @@ pmf_comparison_plot_noGAIN <- function(data_name,n_way){
       axis(2, labels=FALSE)
     }
     abline(0,1, col = 'gray')
-    abline(0,1.1, col = 'red')
-    abline(0, 0.9, col = 'red')
+    #abline(0,1.1, col = 'red')
+    #abline(0, 0.9, col = 'red')
   }
   
   if (n_way==1) {

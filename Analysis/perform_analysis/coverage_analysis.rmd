@@ -50,6 +50,89 @@ plot(Q, df_2way[, 2], ylab = 'coverage', xlab = 'prob', ylim= c(0,1))
 title('MI-Polr')
 ```
 
+Check interval size
+```{r}
+source("../../utils/compute_coverage.R")
+data_name = 'MAR_30'
+n_imputations = 50
+model_name = 'MICE_NOM'
+n_way = 2
+# return: coverage
+# an array of coverage in fraction for each of the pmf
+n_replicates = 500
+# get true pmf
+TRUE_Q = get_true_pmf(n_way)
+# load result
+output_list = load_result(model_name, data_name, n_way)
+q_bar = output_list[['q_bar']] # mean estimate
+u_bar = output_list[['u_bar']] # within group variance
+b = output_list[['b']] # between group variance
+dof = output_list[['dof']] # degree of freedom
+
+
+# calculate total sd
+total_sd = sqrt((1+1/n_imputations)*b + u_bar)
+
+# calculate upper bound and lower bound of the 95% CI
+q_alpha = qt(0.975, df = dof)
+upper_bound = q_bar + q_alpha*total_sd
+lower_bound = q_bar - q_alpha*total_sd
+
+interval_length = apply(upper_bound-lower_bound, MARGIN = 2, FUN = mean)
+total_sd = apply(total_sd, MARGIN = 2, FUN = mean)
+# calculate coverage 0/1 and return the mean of each pmf
+Q = matrix(rep(TRUE_Q, n_replicates), nrow = n_replicates, byrow = TRUE)
+coverage = apply((lower_bound<=Q) & (Q<=upper_bound), MARGIN = 2, FUN = mean)
+print(paste('>> finish computing coverage - model:', model_name,', dataset:', data_name,', n way:', n_way))
+# print(quantile(upper_bound-lower_bound,na.rm = TRUE, probs = c(0.25, 0.5, 0.75)))
+# print(mean(upper_bound-lower_bound,na.rm = TRUE))
+# remove column where TRUE_Q = 0
+indicator = TRUE_Q !=0
+uL = apply(u_bar, MARGIN = 2, FUN = mean)
+bL = apply(b, MARGIN = 2, FUN = mean)
+dofL = apply(dof, MARGIN = 2, FUN = mean)
+coverage = coverage[indicator]
+uL = uL[indicator]
+bL = bL[indicator]
+interval_length = interval_length[indicator]
+total_sd = total_sd[indicator]
+Q_for_plot = TRUE_Q[indicator]
+dofL = dofL[indicator]
+
+indicator = !is.na(coverage)
+coverage = coverage[indicator]
+uL = uL[indicator]
+bL = bL[indicator]
+interval_length = interval_length[indicator]
+total_sd = total_sd[indicator]
+Q_for_plot = Q_for_plot[indicator]
+dofL = dofL[indicator]
+
+#indicator = (Q_for_plot*10000>10) & ((1-Q_for_plot)*10000>10)
+#coverage = coverage[indicator]
+#uL = uL[indicator]
+#bL = bL[indicator]
+#interval_length = interval_length[indicator]
+#total_sd = total_sd[indicator]
+#Q_for_plot = Q_for_plot[indicator]
+#dofL = dofL[indicator]
+```
+
+```{r}
+plot(coverage, interval_length, ylab = 'interval length', xlab = 'coverage')
+title('coverage vs interval length: MI-Multireg')
+plot(coverage, total_sd, ylab = 'total_sd', xlab = 'coverage')
+title('coverage vs total_sd: MI-Multireg')
+plot(coverage, Q_for_plot, ylab = 'Q', xlab = 'coverage', ylim = c(0,0.3))
+title('coverage vs Q: MI-Multireg')
+plot(coverage, log10(uL), ylab = 'log10(uL)', xlab = 'coverage')
+title('coverage vs Q: MI-Multireg')
+plot(coverage, log10(bL), ylab = 'log10(bL)', xlab = 'coverage')
+title('coverage vs Q: MI-Multireg')
+plot(coverage, log10(dofL), ylab = 'log10(dof)', xlab = 'coverage')
+title('coverage vs Q: MI-Multireg')
+```
+
 * * *
 
 

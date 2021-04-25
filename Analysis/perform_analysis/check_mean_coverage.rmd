@@ -1,0 +1,83 @@
+
+---
+title: "Coverage comparison of different models: MAR_30"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(readr)
+library(xtable)
+```
+
+* * *
+
+```{r}
+source("../../utils/compute_coverage.R")
+data_name = 'MAR_30'
+n_imputations = 50
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 1
+coverage = coverage_models(data_name, n_way, n_imputations)
+df = format_list(coverage)
+df_1way = df
+```
+
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of coverage for different imputation methods for data with 30% values MAR (Marginal probabilities)', digits = 2)
+```
+
+```{r}
+apply(df, MARGIN = 2, mean, na.rm = TRUE)
+```
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 2
+coverage = coverage_models(data_name, n_way, n_imputations)
+df = format_list(coverage)
+df_2way = df
+```
+
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of coverage for different imputation methods for data with 30% values MAR (Bivariate probabilities)', digits = 2)
+```
+
+```{r}
+apply(df, MARGIN = 2, mean, na.rm = TRUE)
+```
+
+
+
+```{r, results="hide", warning = FALSE, message=FALSE, echo = FALSE}
+n_way = 3
+coverage = coverage_models(data_name, n_way, n_imputations)
+df = format_list(coverage)
+```
+
+```{r}
+summary = apply(df, MARGIN = 2, quantile , probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
+rownames(summary) <- c('Min.', '1st Qu.', 'Median', '3rd Qu.', 'Max.')
+xtable(summary, caption = 'Distribution of coverage for different imputation methods for data with 30% values MAR (Trivariate probabilities)', digits = 2)
+```
+
+```{r}
+apply(df, MARGIN = 2, mean, na.rm = TRUE)
+```
+
+* * *
+
+
+

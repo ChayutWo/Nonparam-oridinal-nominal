@@ -39,7 +39,9 @@ compute_coverage <- function(model_name, data_name, n_way, n_imputations){
   # print(quantile(upper_bound-lower_bound,na.rm = TRUE, probs = c(0.25, 0.5, 0.75)))
   # print(mean(upper_bound-lower_bound,na.rm = TRUE))
   # remove column where TRUE_Q = 0
-  indicator = TRUE_Q !=0
+  indicator = (TRUE_Q !=0) & (TRUE_Q*10000>10) & ((1-TRUE_Q)*10000>10)
+  print(length(TRUE_Q))
+  print(length(coverage))
   return(coverage[indicator])
 }
 
@@ -51,7 +53,7 @@ coverage_models <- function(data_name, n_way, n_imputations){
   
   # return: 
   # 
-  models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'GAIN_CAT', 'DP', 'PROBIT')
+  models = c('MICE_NOM', 'MICE','CART', 'MICE_RF', 'FOREST', 'GAIN_CAT', 'DP', 'PROBIT')
   #models = c('MICE_NOM', 'MICE', 'CART', 'FOREST', 'GAIN', 'GAIN_DIFF', 'GAIN_CAT', 'GAIN_CAT_DIFF', 'DP', 'PROBIT')
   # output
   COVERAGE = list()

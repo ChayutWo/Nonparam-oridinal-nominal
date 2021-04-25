@@ -1,0 +1,112 @@
+
+---
+title: "Coverage analysis: fully observed data"
+output:
+  pdf_document: default
+  html_document:
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, echo =FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.pos = 'h', fig.align = 'center')
+knitr::opts_chunk$set(fig.cap = "",  fig.path = "Plot")
+library(knitr)
+library(dplyr)
+library(readr)
+library(xtable)
+```
+
+* * *
+```{r}
+source("../../utils/get_true_pmf.R")
+source("../../utils/get_observed_pmf.R")
+
+```
+
+```{r}
+n_way = 1
+
+TRUE_Q = get_true_pmf(n_way)
+Q = matrix(rep(TRUE_Q, 500), nrow = 500, byrow = TRUE)
+OBSERVED_Q = get_observed_pmf(n_way)
+OBSERVED_Q[OBSERVED_Q == 0] = NA
+indicator = (TRUE_Q !=0) & (TRUE_Q*10000>10) & ((1-TRUE_Q)*10000>10)
+```
+
+```{r}
+sd = sqrt(OBSERVED_Q*(1-OBSERVED_Q)/10000)
+upper_bound = OBSERVED_Q + 1.96*sd
+lower_bound = OBSERVED_Q - 1.96*sd
+coverage = apply((lower_bound<=Q) & (Q<=upper_bound), MARGIN = 2, FUN = mean)
+coverage = coverage[indicator]
+summary(coverage, na.rm = TRUE)
+boxplot(coverage)
+coverage_1way = coverage
+```
+
+
+```{r}
+n_way = 2
+
+TRUE_Q = get_true_pmf(n_way)
+Q = matrix(rep(TRUE_Q, 500), nrow = 500, byrow = TRUE)
+OBSERVED_Q = get_observed_pmf(n_way)
+OBSERVED_Q[OBSERVED_Q == 0] = NA
+indicator = (TRUE_Q !=0) & (TRUE_Q*10000>10) & ((1-TRUE_Q)*10000>10)
+```
+
+
+```{r}
+sd = sqrt(OBSERVED_Q*(1-OBSERVED_Q)/10000)
+upper_bound = OBSERVED_Q + 1.96*sd
+lower_bound = OBSERVED_Q - 1.96*sd
+coverage = apply((lower_bound<=Q) & (Q<=upper_bound), MARGIN = 2, FUN = mean)
+coverage = coverage[indicator]
+summary(coverage, na.rm = TRUE)
+boxplot(coverage)
+coverage_2way = coverage
+```
+
+```{r}
+n_way = 3
+
+TRUE_Q = get_true_pmf(n_way)
+Q = matrix(rep(TRUE_Q, 500), nrow = 500, byrow = TRUE)
+OBSERVED_Q = get_observed_pmf(n_way)
+OBSERVED_Q[OBSERVED_Q == 0] = NA
+indicator = (TRUE_Q !=0) & (TRUE_Q*10000>10) & ((1-TRUE_Q)*10000>10)
+```
+
+```{r}
+sd = sqrt(OBSERVED_Q*(1-OBSERVED_Q)/10000)
+upper_bound = OBSERVED_Q + 1.96*sd
+lower_bound = OBSERVED_Q - 1.96*sd
+coverage = apply((lower_bound<=Q) & (Q<=upper_bound), MARGIN = 2, FUN = mean)
+coverage = coverage[indicator]
+summary(coverage, na.rm = TRUE)
+boxplot(coverage)
+coverage_3way = coverage
+```
+
+```{r}
+coverage = list()
+coverage[['marginal']] = coverage_1way 
+coverage[['bivariate']] = coverage_2way 
+coverage[['trivariate']] = coverage_3way
+boxplot(coverage, col = 'light blue', ylab = 'Coverage (fraction)',  ylim = c(0.8,1),
+        main = paste('Coverage using fully observed data for different distributions'))
+```
+
+```{r, fig.width=5, fig.height = 2.5}
+# boxplot for estimates for marginal distribution
+setEPS()
+postscript("../figures/coverage_fully_observed.eps", width=7, height=4.5, horizontal = FALSE, onefile=FALSE)
+boxplot(coverage, col = 'light blue', ylab = 'Coverage (fraction)',  ylim = c(0.8,1))
+dev.off()
+```
+
+* * *
+
+
+
