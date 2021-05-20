@@ -108,14 +108,14 @@ total_sd = total_sd[indicator]
 Q_for_plot = Q_for_plot[indicator]
 dofL = dofL[indicator]
 
-#indicator = (Q_for_plot*10000>10) & ((1-Q_for_plot)*10000>10)
-#coverage = coverage[indicator]
-#uL = uL[indicator]
-#bL = bL[indicator]
-#interval_length = interval_length[indicator]
-#total_sd = total_sd[indicator]
-#Q_for_plot = Q_for_plot[indicator]
-#dofL = dofL[indicator]
+indicator = (Q_for_plot*10000>10) & ((1-Q_for_plot)*10000>10)
+coverage = coverage[indicator]
+uL = uL[indicator]
+bL = bL[indicator]
+interval_length = interval_length[indicator]
+total_sd = total_sd[indicator]
+Q_for_plot = Q_for_plot[indicator]
+dofL = dofL[indicator]
 ```
 
 ```{r}
