@@ -26,7 +26,7 @@ We also evaluate the performance of a deep learning imputation method like GAIN 
 * **[utils/models](https://github.com/ChayutWo/Nonparam-oridinal-nominal/tree/master/utils/models)**: Folder that contains R codes for running different MI methods. The names of R files are self-explanatory.
 
 ## Publications
-Chayut Wongkamthong, Olanrewaju Akande, A Comparative Study of Imputation Methods for Multivariate Ordinal Data, Journal of Survey Statistics and Methodology, Volume 11, Issue 1, February 2023, Pages 189–212, https://doi.org/10.1093/jssam/smab028 [Link](https://academic.oup.com/jssam/article-abstract/11/1/189/6384871?redirectedFrom=fulltext)
+Chayut Wongkamthong, Olanrewaju Akande, A Comparative Study of Imputation Methods for Multivariate Ordinal Data, Journal of Survey Statistics and Methodology, Volume 11, Issue 1, February 2023, Pages 189–212, https://doi.org/10.1093/jssam/smab028
 
 Wongkamthong, C., & Akande, O. (2020). A Comparative Study of Imputation Methods for Multivariate Ordinal Data. arXiv: Methodology. [arXiv](https://arxiv.org/abs/2010.10471)
 
