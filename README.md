@@ -32,8 +32,8 @@ Wongkamthong, C., & Akande, O. (2020). A Comparative Study of Imputation Methods
 
 **Author**
 
-Chayut Wongkamthong - Social Science Research Institute (SSRI), Duke University
+[Chayut Wongkamthong](https://chayutwo.github.io/) - Social Science Research Institute (SSRI), Duke University
 
 **Advisor**
 
-Professor Olanrewaju M. Akande - Social Science Research Institute (SSRI), and Statistical Science, Duke University
+[Professor Olanrewaju M. Akande](https://www.olanrewajuakande.com/) - Social Science Research Institute (SSRI), and Statistical Science, Duke University
